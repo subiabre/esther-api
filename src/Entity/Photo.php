@@ -16,7 +16,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[Gedmo\Loggable()]
 #[API\GetCollection(security: "is_granted('ROLE_USER')")]
 #[API\Post(security: "is_granted('ROLE_USER')")]
-#[API\Get(security: "is_granted('ROLE_USER')")]
+#[API\Get(security: "is_granted('SCOPE_VIEW', object)")]
 #[API\Put(security: "is_granted('ROLE_USER')")]
 #[API\Delete(security: "is_granted('ROLE_USER')")]
 #[API\Patch(security: "is_granted('ROLE_USER')")]
@@ -42,9 +42,19 @@ class Photo implements Loggable
     #[ORM\Embedded(class: PhotoDateRange::class)]
     private ?PhotoDateRange $date = null;
 
+    #[API\ApiProperty(security: "is_granted('ROLE_ADMIN')")]
+    #[ORM\OneToMany(
+        targetEntity: PhotoScope::class,
+        mappedBy: 'photo',
+        cascade: ['persist'],
+        orphanRemoval: true
+    )]
+    private Collection $scopes;
+
     public function __construct()
     {
         $this->images = new ArrayCollection();
+        $this->scopes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -90,6 +100,36 @@ class Photo implements Loggable
     public function setDate(PhotoDateRange $date): static
     {
         $this->date = $date;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PhotoScope>
+     */
+    public function getScopes(): Collection
+    {
+        return $this->scopes;
+    }
+
+    public function addScope(PhotoScope $scope): static
+    {
+        if (!$this->scopes->contains($scope)) {
+            $this->scopes->add($scope);
+            $scope->setPhoto($this);
+        }
+
+        return $this;
+    }
+
+    public function removeScope(PhotoScope $scope): static
+    {
+        if ($this->scopes->removeElement($scope)) {
+            // set the owning side to null (unless already changed)
+            if ($scope->getPhoto() === $this) {
+                $scope->setPhoto(null);
+            }
+        }
 
         return $this;
     }
