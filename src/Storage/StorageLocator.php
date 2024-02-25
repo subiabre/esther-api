@@ -6,12 +6,16 @@ use League\Flysystem\Filesystem;
 
 class StorageLocator
 {
+    /** @var DriverInterface[] */
+    private array $drivers;
+
     /**
      * @param iterable<DriverInterface> $drivers
      */
     public function __construct(
-        private iterable $drivers
+        iterable $drivers,
     ) {
+        $this->drivers = \iterator_to_array($drivers);
     }
 
     public function getDriver(): DriverInterface
@@ -21,6 +25,13 @@ class StorageLocator
 
     public function getFilesystem(): Filesystem
     {
-        return new Filesystem($this->getDriver()->getAdapter());
+        $driver = $this->getDriver();
+
+        return new Filesystem(
+            $driver->getAdapter(),
+            [
+                'public_url' => $driver->getPublicUrl()
+            ]
+        );
     }
 }

@@ -26,11 +26,11 @@ class ImageManipulationService
     public function generateImageThumb(Image $image, int $width): ImageThumb
     {
         $data = \fopen($image->getSrc(), 'r');
-        $data = $this->manager->read($data)->resize($width);
+        $data = $this->manager->read($data)->scaleDown($width);
         $path = sprintf(
-            "%d_%s.webp",
-            $image->getId(),
-            self::IMAGE_RESIZED_FILENAME
+            "%s_%s.webp",
+            self::IMAGE_RESIZED_FILENAME,
+            hash('md5', $image->getSrc()),
         );
 
         $this->storage->writeStream(
@@ -39,7 +39,7 @@ class ImageManipulationService
         );
 
         $thumb = new ImageThumb;
-        $thumb->setSrc($path);
+        $thumb->setSrc($this->storage->publicUrl($path));
         $thumb->setWidth($data->width());
         $thumb->setHeight($data->height());
 

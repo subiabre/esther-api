@@ -13,7 +13,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
-// #[UniqueEntity(fields: ['src'])]
+#[UniqueEntity(fields: ['src'])]
 #[API\GetCollection(security: "is_granted('ROLE_USER')")]
 #[API\Post(security: "is_granted('ROLE_USER')", processor: ImageStateProcessor::class)]
 #[API\Get(security: "is_granted('ROLE_USER')")]
@@ -42,7 +42,7 @@ class Image
     private ?ImageMetadata $metadata = null;
 
     #[API\ApiProperty(writable: false)]
-    #[ORM\OneToMany(targetEntity: ImageThumb::class, mappedBy: 'image')]
+    #[ORM\OneToMany(targetEntity: ImageThumb::class, mappedBy: 'image', cascade: ['persist'])]
     private Collection $thumbs;
 
     public function __construct()
