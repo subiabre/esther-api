@@ -19,10 +19,7 @@ class ImageMetadataService
             $sizes[1],
             $headers['content-length'],
             $sizes['mime'],
-            \DateTimeImmutable::createFromFormat(
-                \DateTime::RFC7231,
-                $headers['last-modified']
-            ),
+            $this->getLastModified($headers),
             $this->getExif($src)
         );
     }
@@ -37,9 +34,21 @@ class ImageMetadataService
         return $headers;
     }
 
+    private function getLastModified(array $headers): ?\DateTimeImmutable
+    {
+        if (!\array_key_exists('last-modified', $headers)) {
+            return null;
+        }
+
+        return \DateTimeImmutable::createFromFormat(
+            \DateTime::RFC7231,
+            $headers['last-modified']
+        ); 
+    }
+
     private function getExif(string $src): array
     {
-        $exif = @\exif_read_data($src, null, true) ?? [];
+        $exif = @\exif_read_data($src, null, true) ?: [];
 
         return $this->cleanExif($exif);
     }

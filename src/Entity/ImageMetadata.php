@@ -21,8 +21,8 @@ class ImageMetadata
         #[ORM\Column(type: Types::STRING)]
         public readonly string $mimeType,
 
-        #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
-        public readonly \DateTimeImmutable $lastModified,
+        #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+        public readonly ?\DateTimeImmutable $lastModified,
 
         #[ORM\Column(type: Types::JSON)]
         public readonly array $exif,
