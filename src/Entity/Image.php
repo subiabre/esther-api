@@ -7,11 +7,10 @@ use App\Entity\Trait\TimestampableCreation;
 use App\Entity\Trait\TimestampableUpdation;
 use App\Repository\ImageRepository;
 use App\State\ImageStateProcessor;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[UniqueEntity(fields: ['src'])]
 #[API\GetCollection(security: "is_granted('ROLE_USER')")]
@@ -31,6 +30,7 @@ class Image
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Assert\Url()]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $src = null;
 
@@ -38,17 +38,12 @@ class Image
     private ?string $alt = null;
 
     #[API\ApiProperty(writable: false)]
-    #[ORM\Embedded(class: ImageMetadata::class)]
-    private ?ImageMetadata $metadata = null;
+    #[ORM\Embedded(class: ImageThumb::class)]
+    private ?ImageThumb $thumb;
 
     #[API\ApiProperty(writable: false)]
-    #[ORM\OneToMany(targetEntity: ImageThumb::class, mappedBy: 'image', cascade: ['persist'])]
-    private Collection $thumbs;
-
-    public function __construct()
-    {
-        $this->thumbs = new ArrayCollection();
-    }
+    #[ORM\Embedded(class: ImageMetadata::class)]
+    private ?ImageMetadata $metadata = null;
 
     public function getId(): ?int
     {
@@ -79,6 +74,18 @@ class Image
         return $this;
     }
 
+    public function getThumb(): ?ImageThumb
+    {
+        return $this->thumb;
+    }
+
+    public function setThumb(ImageThumb $thumb): static
+    {
+        $this->thumb = $thumb;
+
+        return $this;
+    }
+
     public function getMetadata(): ?ImageMetadata
     {
         return $this->metadata;
@@ -87,36 +94,6 @@ class Image
     public function setMetadata(ImageMetadata $metadata): static
     {
         $this->metadata = $metadata;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, ImageThumb>
-     */
-    public function getThumbs(): Collection
-    {
-        return $this->thumbs;
-    }
-
-    public function addThumb(ImageThumb $thumb): static
-    {
-        if (!$this->thumbs->contains($thumb)) {
-            $this->thumbs->add($thumb);
-            $thumb->setImage($this);
-        }
-
-        return $this;
-    }
-
-    public function removeThumb(ImageThumb $thumb): static
-    {
-        if ($this->thumbs->removeElement($thumb)) {
-            // set the owning side to null (unless already changed)
-            if ($thumb->getImage() === $this) {
-                $thumb->setImage(null);
-            }
-        }
 
         return $this;
     }

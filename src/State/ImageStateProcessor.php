@@ -11,10 +11,6 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class ImageStateProcessor implements ProcessorInterface
 {
-    private array $IMAGE_THUMB_SIZES = [
-        320
-    ];
-
     public function __construct(
         private ImageMetadataService $imageMetadataService,
         private ImageManipulationService $imageManipulationService,
@@ -28,13 +24,8 @@ class ImageStateProcessor implements ProcessorInterface
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Image
     {
         $data->setMetadata($this->imageMetadataService->generateImageMetadata($data));
+        $data->setThumb($this->imageManipulationService->generateImageThumb($data));
         
-        foreach ($this->IMAGE_THUMB_SIZES as $size) {
-            $thumb = $this->imageManipulationService->generateImageThumb($data, $size);
-
-            $data->addThumb($thumb);
-        }
-
         $this->entityManager->persist($data);
         $this->entityManager->flush();
 

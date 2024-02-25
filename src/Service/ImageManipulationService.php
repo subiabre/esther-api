@@ -23,7 +23,7 @@ class ImageManipulationService
         $this->manager = new ImageManager(new ImagickDriver);
     }
 
-    public function generateImageThumb(Image $image, int $width): ImageThumb
+    public function generateImageThumb(Image $image, int $width = 420): ImageThumb
     {
         $data = \fopen($image->getSrc(), 'r');
         $data = $this->manager->read($data)->scaleDown($width);
