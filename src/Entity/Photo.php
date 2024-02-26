@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Metadata as API;
 use App\Entity\Trait\TimestampableCreation;
 use App\Entity\Trait\TimestampableUpdation;
+use App\Filter\PhotoDateRangeFilter;
 use App\Repository\PhotoRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -39,6 +40,7 @@ class Photo implements Loggable
     #[Gedmo\Versioned]
     #[Assert\Valid()]
     #[Assert\NotBlank()]
+    #[API\ApiFilter(PhotoDateRangeFilter::class)]
     #[ORM\Embedded(class: PhotoDateRange::class)]
     private ?PhotoDateRange $date = null;
 
