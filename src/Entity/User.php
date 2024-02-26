@@ -39,13 +39,6 @@ class User implements UserInterface, UserOwnedInterface, PasswordAuthenticatedUs
     private ?string $email = null;
 
     /**
-     * @var list<string> The user roles
-     */
-    #[API\ApiProperty(security: "is_granted('ROLE_ADMIN')")]
-    #[ORM\Column]
-    private array $roles = [];
-
-    /**
      * @var string The hashed password
      */
     #[API\ApiProperty(writable: false, readable: false)]
@@ -57,6 +50,13 @@ class User implements UserInterface, UserOwnedInterface, PasswordAuthenticatedUs
     #[API\ApiProperty(readable: false)]
     #[SerializedName('password')]
     private ?string $plainPassword = null;
+
+    /**
+     * @var list<string> The user roles
+     */
+    #[API\ApiProperty(security: "is_granted('ROLE_ADMIN')")]
+    #[ORM\Column]
+    private array $roles = [];
 
     #[API\ApiProperty(writable: false, security: "is_granted('USER_EDIT', object)")]
     #[ORM\OneToMany(targetEntity: Session::class, mappedBy: 'user', orphanRemoval: true)]
@@ -100,35 +100,6 @@ class User implements UserInterface, UserOwnedInterface, PasswordAuthenticatedUs
     }
 
     /**
-     * @see UserInterface
-     *
-     * @return list<string>
-     */
-    public function getRoles(): array
-    {
-        $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
-
-        return array_unique($roles);
-    }
-
-    public function hasRoles(array $roles): bool
-    {
-        return 0 < count(array_intersect($this->getRoles(), $roles));
-    }
-
-    /**
-     * @param list<string> $roles
-     */
-    public function setRoles(array $roles): static
-    {
-        $this->roles = $roles;
-
-        return $this;
-    }
-
-    /**
      * @see PasswordAuthenticatedUserInterface
      */
     public function getPassword(): string
@@ -162,6 +133,35 @@ class User implements UserInterface, UserOwnedInterface, PasswordAuthenticatedUs
     {
         // If you store any temporary, sensitive data on the user, clear it here
         $this->plainPassword = null;
+    }
+
+    /**
+     * @see UserInterface
+     *
+     * @return list<string>
+     */
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    /**
+     * @param list<string> $roles
+     */
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
+
+        return $this;
+    }
+
+    public function hasRoles(array $roles): bool
+    {
+        return 0 < count(array_intersect($this->getRoles(), $roles));
     }
 
     /**
