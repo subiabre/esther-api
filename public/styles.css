@@ -1,0 +1,27 @@
+body {
+    margin-top: 0;
+}
+
+ul[role="menu"]+div {
+    position: sticky !important;
+}
+
+#formats {
+    max-width: 100%;
+}
+
+#formats .information-container {
+    padding: 0;
+    max-width: none;
+
+    gap: 50px;
+    display: flex;
+    text-align: left;
+}
+
+#formats .information-container .info ul {
+    padding: 0;
+
+    color: #2c2c2c;
+    list-style: none;
+}
