@@ -12,6 +12,6 @@ class IndexController extends AbstractController
     #[Route('/', name: 'app_index')]
     public function index(): Response
     {
-        return new RedirectResponse('/api/docs');
+        return new RedirectResponse('/v1/docs');
     }
 }
