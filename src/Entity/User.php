@@ -58,7 +58,7 @@ class User implements UserInterface, UserOwnedInterface, PasswordAuthenticatedUs
     #[SerializedName('password')]
     private ?string $plainPassword = null;
 
-    #[API\ApiProperty(writable: false)]
+    #[API\ApiProperty(writable: false, security: "is_granted('USER_EDIT', object)")]
     #[ORM\OneToMany(targetEntity: Session::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $sessions;
 

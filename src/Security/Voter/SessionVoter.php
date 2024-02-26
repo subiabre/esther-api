@@ -33,9 +33,6 @@ class SessionVoter extends Voter
 
         switch ($attribute) {
             case self::EDIT:
-                return $subject->isOwnedBy($user);
-                break;
-
             case self::VIEW:
                 return $user->hasRoles(['ROLE_ADMIN'])
                     || $subject->isOwnedBy($user);

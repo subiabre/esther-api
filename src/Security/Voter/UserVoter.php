@@ -23,6 +23,7 @@ class UserVoter extends Voter
      */
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
     {
+        /** @var ?User */
         $user = $token->getUser();
 
         if (!$user instanceof UserInterface) {
@@ -31,7 +32,8 @@ class UserVoter extends Voter
 
         switch ($attribute) {
             case self::EDIT:
-                return $subject->isOwnedBy($user);
+                return $user->hasRoles(['ROLE_ADMIN'])
+                    || $subject->isOwnedBy($user);
                 break;
             case self::VIEW:
                 return true;
