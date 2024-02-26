@@ -38,15 +38,16 @@ class Image
     private ?string $alt = null;
 
     #[API\ApiProperty(writable: false)]
+    #[ORM\ManyToOne(inversedBy: 'images')]
+    private ?Photo $photo = null;
+
+    #[API\ApiProperty(writable: false)]
     #[ORM\Embedded(class: ImageThumb::class)]
     private ?ImageThumb $thumb;
 
     #[API\ApiProperty(writable: false)]
     #[ORM\Embedded(class: ImageMetadata::class)]
     private ?ImageMetadata $metadata = null;
-
-    #[ORM\ManyToOne(inversedBy: 'images')]
-    private ?Photo $photo = null;
 
     public function getId(): ?int
     {
@@ -77,6 +78,18 @@ class Image
         return $this;
     }
 
+    public function getPhoto(): ?Photo
+    {
+        return $this->photo;
+    }
+
+    public function setPhoto(?Photo $photo): static
+    {
+        $this->photo = $photo;
+
+        return $this;
+    }
+
     public function getThumb(): ?ImageThumb
     {
         return $this->thumb;
@@ -97,18 +110,6 @@ class Image
     public function setMetadata(ImageMetadata $metadata): static
     {
         $this->metadata = $metadata;
-
-        return $this;
-    }
-
-    public function getPhoto(): ?Photo
-    {
-        return $this->photo;
-    }
-
-    public function setPhoto(?Photo $photo): static
-    {
-        $this->photo = $photo;
 
         return $this;
     }
