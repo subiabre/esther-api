@@ -17,7 +17,11 @@ use Symfony\Component\Serializer\Annotation\SerializedName;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[API\GetCollection(security: "is_granted('ROLE_USER')")]
-#[API\Post(security: "is_granted('PUBLIC_ACCESS')", processor: UserPasswordProcessor::class)]
+#[API\Post(
+    security: "is_granted('PUBLIC_ACCESS')",
+    processor: UserPasswordProcessor::class,
+    validationContext: ['groups' => ['Default', 'postValidation']]
+)]
 #[API\Get(security: "is_granted('ROLE_USER')")]
 #[API\Put(security: "is_granted('USER_EDIT', object)")]
 #[API\Delete(security: "is_granted('USER_EDIT', object)")]
@@ -45,7 +49,7 @@ class User implements UserInterface, UserOwnedInterface, PasswordAuthenticatedUs
     #[ORM\Column]
     private ?string $password = null;
 
-    #[Assert\NotBlank()]
+    #[Assert\NotBlank(['groups' => ['postValidation']])]
     #[Assert\Length(min: 12)]
     #[API\ApiProperty(readable: false)]
     #[SerializedName('password')]
@@ -54,7 +58,7 @@ class User implements UserInterface, UserOwnedInterface, PasswordAuthenticatedUs
     /**
      * @var list<string> The user roles
      */
-    #[API\ApiProperty(security: "is_granted('ROLE_ADMIN')")]
+    #[API\ApiProperty(securityPostDenormalize: "is_granted('ROLE_ADMIN')")]
     #[ORM\Column]
     private array $roles = [];
 
