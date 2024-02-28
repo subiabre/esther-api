@@ -21,8 +21,10 @@ class UserPasswordProcessor implements ProcessorInterface
      */
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): User
     {
-        $data->setPassword($this->userPasswordHasher->hashPassword($data, $data->getPlainPassword()));
-        $data->eraseCredentials();
+        if ($data->getPlainPassword()) {
+            $data->setPassword($this->userPasswordHasher->hashPassword($data, $data->getPlainPassword()));
+            $data->eraseCredentials();
+        }
 
         $this->entityManager->persist($data);
         $this->entityManager->flush();

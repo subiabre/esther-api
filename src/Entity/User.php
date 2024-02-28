@@ -11,11 +11,13 @@ use App\State\UserPasswordProcessor;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\SerializedName;
 use Symfony\Component\Validator\Constraints as Assert;
 
+#[UniqueEntity(fields: ['email'])]
 #[API\GetCollection(security: "is_granted('ROLE_USER')")]
 #[API\Post(
     security: "is_granted('PUBLIC_ACCESS')",
@@ -23,9 +25,15 @@ use Symfony\Component\Validator\Constraints as Assert;
     validationContext: ['groups' => ['Default', 'postValidation']]
 )]
 #[API\Get(security: "is_granted('ROLE_USER')")]
-#[API\Put(security: "is_granted('USER_EDIT', object)")]
+#[API\Put(
+    security: "is_granted('USER_EDIT', object)",
+    processor: UserPasswordProcessor::class
+)]
 #[API\Delete(security: "is_granted('USER_EDIT', object)")]
-#[API\Patch(security: "is_granted('USER_EDIT', object)")]
+#[API\Patch(
+    security: "is_granted('USER_EDIT', object)",
+    processor: UserPasswordProcessor::class
+)]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements UserInterface, UserOwnedInterface, PasswordAuthenticatedUserInterface
 {
