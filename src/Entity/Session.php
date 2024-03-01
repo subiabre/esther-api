@@ -6,6 +6,7 @@ use ApiPlatform\Metadata as API;
 use App\Dto\SessionAuthenticationDto;
 use App\Entity\Interface\UserOwnedInterface;
 use App\Entity\Trait\TimestampableCreation;
+use App\Entity\Trait\TimestampableUpdation;
 use App\Repository\SessionRepository;
 use App\State\SessionAuthenticationProcessor;
 use Doctrine\ORM\Mapping as ORM;
@@ -21,6 +22,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Session implements UserOwnedInterface
 {
     use TimestampableCreation;
+    use TimestampableUpdation;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
