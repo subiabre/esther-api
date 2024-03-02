@@ -11,7 +11,7 @@ use League\Flysystem\Filesystem;
 
 class ImageManipulationService
 {
-    public const IMAGE_RESIZED_QUALITY = 95;
+    public const IMAGE_RESIZED_QUALITY = 96;
     public const IMAGE_RESIZED_FILENAME = 'resized';
 
     private Filesystem $storage;
