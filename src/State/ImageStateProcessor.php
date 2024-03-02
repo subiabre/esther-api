@@ -23,8 +23,8 @@ class ImageStateProcessor implements ProcessorInterface
      */
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Image
     {
-        $data->setMetadata($this->imageMetadataService->generateImageMetadata($data));
         $data->setThumb($this->imageManipulationService->generateImageThumb($data));
+        $data->setMetadata($this->imageMetadataService->generateImageMetadata($data));
         
         $this->entityManager->persist($data);
         $this->entityManager->flush();

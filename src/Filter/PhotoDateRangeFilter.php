@@ -6,7 +6,6 @@ use ApiPlatform\Doctrine\Orm\Filter\AbstractFilter;
 use Doctrine\ORM\QueryBuilder;
 use ApiPlatform\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use ApiPlatform\Metadata\Operation;
-use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Component\PropertyInfo\Type;
 
 final class PhotoDateRangeFilter extends AbstractFilter
