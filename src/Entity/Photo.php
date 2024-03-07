@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata as API;
 use App\Entity\Trait\TimestampableCreation;
 use App\Entity\Trait\TimestampableUpdation;
@@ -35,6 +36,10 @@ class Photo implements Loggable
 
     #[Assert\NotBlank()]
     #[Assert\Count(min: 1)]
+    #[API\ApiFilter(
+        SearchFilter::class,
+        properties: ['images.alt' => 'partial']
+    )]
     #[ORM\OneToMany(
         targetEntity: Image::class,
         mappedBy: 'photo',
