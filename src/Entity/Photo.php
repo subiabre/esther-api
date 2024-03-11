@@ -35,19 +35,6 @@ class Photo implements Loggable
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Assert\NotBlank()]
-    #[Assert\Count(min: 1)]
-    #[API\ApiFilter(
-        SearchFilter::class,
-        properties: ['images.alt' => 'partial']
-    )]
-    #[ORM\OneToMany(
-        targetEntity: Image::class,
-        mappedBy: 'photo',
-        cascade: ['persist']
-    )]
-    private Collection $images;
-
     #[Gedmo\Versioned]
     #[Assert\Valid()]
     #[Assert\NotBlank()]
@@ -61,6 +48,19 @@ class Photo implements Loggable
     #[API\ApiFilter(PhotoAddressComponentsFilter::class)]
     #[ORM\Embedded(class: PhotoAddress::class)]
     private ?PhotoAddress $address = null;
+
+    #[Assert\NotBlank()]
+    #[Assert\Count(min: 1)]
+    #[API\ApiFilter(
+        SearchFilter::class,
+        properties: ['images.alt' => 'partial']
+    )]
+    #[ORM\OneToMany(
+        targetEntity: Image::class,
+        mappedBy: 'photo',
+        cascade: ['persist']
+    )]
+    private Collection $images;
 
     #[API\ApiProperty(security: "is_granted('ROLE_ADMIN')")]
     #[ORM\OneToMany(
@@ -80,6 +80,30 @@ class Photo implements Loggable
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getDate(): ?PhotoDateRange
+    {
+        return $this->date;
+    }
+
+    public function setDate(PhotoDateRange $date): static
+    {
+        $this->date = $date;
+
+        return $this;
+    }
+
+    public function getAddress(): ?PhotoAddress
+    {
+        return $this->address;
+    }
+
+    public function setAddress(PhotoAddress $address): static
+    {
+        $this->address = $address;
+
+        return $this;
     }
 
     /**
@@ -108,30 +132,6 @@ class Photo implements Loggable
                 $image->setPhoto(null);
             }
         }
-
-        return $this;
-    }
-
-    public function getDate(): ?PhotoDateRange
-    {
-        return $this->date;
-    }
-
-    public function setDate(PhotoDateRange $date): static
-    {
-        $this->date = $date;
-
-        return $this;
-    }
-
-    public function getAddress(): ?PhotoAddress
-    {
-        return $this->address;
-    }
-
-    public function setAddress(PhotoAddress $address): static
-    {
-        $this->address = $address;
 
         return $this;
     }
