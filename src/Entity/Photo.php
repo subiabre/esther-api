@@ -6,6 +6,7 @@ use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata as API;
 use App\Entity\Trait\TimestampableCreation;
 use App\Entity\Trait\TimestampableUpdation;
+use App\Filter\PhotoAddressComponentsFilter;
 use App\Filter\PhotoDateOrderFilter;
 use App\Filter\PhotoDateRangeFilter;
 use App\Repository\PhotoRepository;
@@ -50,10 +51,16 @@ class Photo implements Loggable
     #[Gedmo\Versioned]
     #[Assert\Valid()]
     #[Assert\NotBlank()]
-    #[API\ApiFilter(PhotoDateRangeFilter::class)]
     #[API\ApiFilter(PhotoDateOrderFilter::class)]
+    #[API\ApiFilter(PhotoDateRangeFilter::class)]
     #[ORM\Embedded(class: PhotoDateRange::class)]
     private ?PhotoDateRange $date = null;
+
+    #[Gedmo\Versioned]
+    #[Assert\Valid()]
+    #[API\ApiFilter(PhotoAddressComponentsFilter::class)]
+    #[ORM\Embedded(class: PhotoAddress::class)]
+    private ?PhotoAddress $address = null;
 
     #[API\ApiProperty(security: "is_granted('ROLE_ADMIN')")]
     #[ORM\OneToMany(
@@ -113,6 +120,18 @@ class Photo implements Loggable
     public function setDate(PhotoDateRange $date): static
     {
         $this->date = $date;
+
+        return $this;
+    }
+
+    public function getAddress(): ?PhotoAddress
+    {
+        return $this->address;
+    }
+
+    public function setAddress(PhotoAddress $address): static
+    {
+        $this->address = $address;
 
         return $this;
     }
