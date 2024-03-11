@@ -51,7 +51,7 @@ final class PhotoAddressComponentsFilter extends AbstractFilter
                         $components[0]
                     )
                 )
-                ->setParameter($parameterName, sprintf('"%s"', $components[1]));
+                ->setParameter($parameterName, json_encode($components[1]));
         }
     }
 
