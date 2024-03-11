@@ -32,7 +32,24 @@ final class PhotoAddressComponentsFilter extends AbstractFilter
             return;
         }
 
-        $values = explode(';', $values[self::FILTER_NAME]);
+        $values = $values[self::FILTER_NAME];
+        if (\is_array($values)) {
+            foreach ($values as $key => $value) {
+                $this->addWhere($value, $property, 'or', $queryBuilder, $queryNameGenerator);
+            }
+        } else {
+            $this->addWhere($values, $property, 'and', $queryBuilder, $queryNameGenerator);
+        }
+    }
+
+    public function addWhere(
+        string $value,
+        string $property,
+        string $strategy,
+        QueryBuilder $queryBuilder,
+        QueryNameGeneratorInterface $queryNameGenerator,
+    ) {
+        $values = explode(';', $value);
         foreach ($values as $value) {
             if (empty($value)) continue;
 
@@ -41,17 +58,27 @@ final class PhotoAddressComponentsFilter extends AbstractFilter
             $propertyName = sprintf("%s.components", $property);
             $parameterName = $queryNameGenerator->generateParameterName($propertyName);
 
-            $queryBuilder
-                ->andWhere(
-                    sprintf(
-                        "JSON_CONTAINS(%s.%s, :%s, '$.%s') = 1",
-                        $alias,
-                        $propertyName,
-                        $parameterName,
-                        $components[0]
-                    )
-                )
-                ->setParameter($parameterName, json_encode($components[1]));
+            $where = sprintf(
+                "JSON_CONTAINS(%s.%s, :%s, '$.%s') = 1",
+                $alias,
+                $propertyName,
+                $parameterName,
+                $components[0]
+            );
+
+            switch ($strategy) {
+                case 'or':
+                    $queryBuilder
+                        ->orWhere($where)
+                        ->setParameter($parameterName, json_encode($components[1]));
+                    break;
+                case 'and';
+                default:
+                    $queryBuilder
+                        ->andWhere($where)
+                        ->setParameter($parameterName, json_encode($components[1]));
+                    break;
+            }
         }
     }
 
