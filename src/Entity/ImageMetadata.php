@@ -10,22 +10,22 @@ class ImageMetadata
 {
     public function __construct(
         #[ORM\Column(type: Types::INTEGER)]
-        public readonly int $width,
+        public int $width,
 
         #[ORM\Column(type: Types::INTEGER)]
-        public readonly int $height,
+        public int $height,
 
         #[ORM\Column(type: Types::INTEGER)]
-        public readonly int $filesize,
+        public int $filesize,
 
         #[ORM\Column(type: Types::STRING)]
-        public readonly string $mimeType,
+        public string $mimeType,
 
         #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
-        public readonly ?\DateTimeImmutable $lastModified,
+        public ?\DateTimeImmutable $lastModified,
 
         #[ORM\Column(type: Types::JSON)]
-        public readonly array $exif,
+        public array $exif,
     ) {
     }
 }
