@@ -7,6 +7,7 @@ use App\Entity\Trait\TimestampableCreation;
 use App\Entity\Trait\TimestampableUpdation;
 use App\Repository\ImageRepository;
 use App\State\ImageStateProcessor;
+use App\Validator\ImageFile;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -31,6 +32,7 @@ class Image
     private ?int $id = null;
 
     #[Assert\Url()]
+    #[ImageFile()]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $src = null;
 
