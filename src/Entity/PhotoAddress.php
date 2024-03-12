@@ -9,13 +9,13 @@ use Doctrine\ORM\Mapping as ORM;
 class PhotoAddress
 {
     public function __construct(
-        #[ORM\Column(type: Types::STRING)]
+        #[ORM\Column(type: Types::STRING, nullable: true)]
         public string $fullName,
 
-        #[ORM\Column(type: Types::STRING)]
+        #[ORM\Column(type: Types::STRING, nullable: true)]
         public string $shortName,
 
-        #[ORM\Column(type: Types::JSON)]
+        #[ORM\Column(type: Types::JSON, nullable: true)]
         public array $components,
     ) {
     }
