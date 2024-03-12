@@ -11,14 +11,21 @@ class ImageMetadataService
     {
         $src = $image->getSrc();
 
-        $sizes = \getimagesize($src);
+        $imginfo = \getimagesize($src);
         $headers = $this->getHeaders($src);
 
+        $filesize = 0;
+        if (\array_key_exists('content-length', $headers)) {
+            $filesize = $headers['content-length'];
+        } else {
+            $filesize = $imginfo[0] * $imginfo[1] * $imginfo["bits"];
+        }
+
         return new ImageMetadata(
-            $sizes[0],
-            $sizes[1],
-            $headers['content-length'],
-            $sizes['mime'],
+            $imginfo[0],
+            $imginfo[1],
+            $filesize,
+            $imginfo['mime'],
             $this->getLastModified($headers),
             $this->getExif($src)
         );
@@ -43,7 +50,7 @@ class ImageMetadataService
         return \DateTimeImmutable::createFromFormat(
             \DateTime::RFC7231,
             $headers['last-modified']
-        ); 
+        );
     }
 
     private function getExif(string $src): array
