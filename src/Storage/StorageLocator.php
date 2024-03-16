@@ -26,11 +26,6 @@ class StorageLocator
         return $this->drivers;
     }
 
-    public function getDriver(): DriverInterface
-    {
-        return $this->drivers[0];
-    }
-
     public function getDriverByName(string $name): ?DriverInterface
     {
         $result = null;
@@ -44,9 +39,9 @@ class StorageLocator
         return $result;
     }
 
-    public function getFilesystem(): Filesystem
+    public function getFilesystem(string $name = 'local'): Filesystem
     {
-        $driver = $this->getDriver();
+        $driver = $name ? $this->getDriverByName($name) : $this->drivers[0];
 
         return new Filesystem(
             $driver->getAdapter(),

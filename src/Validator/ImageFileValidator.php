@@ -23,7 +23,7 @@ class ImageFileValidator extends ConstraintValidator
             throw new UnexpectedValueException($value, 'string');
         }
 
-        if ($this->isImage($value)) {
+        if (self::isImage($value)) {
             return;
         }
 
@@ -32,7 +32,7 @@ class ImageFileValidator extends ConstraintValidator
             ->addViolation();
     }
 
-    private function isImage(string $file): bool
+    public static function isImage(string $file): bool
     {
         try {
             /**

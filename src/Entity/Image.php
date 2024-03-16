@@ -63,7 +63,11 @@ class Image
 
     public function setSrc(string $src): static
     {
-        $this->src = $src;
+        $url = parse_url($src);
+        $path = str_replace(basename($url['path']), '', $url['path']);
+        $file = urlencode(urldecode(basename($url['path'])));
+
+        $this->src = sprintf("%s://%s%s%s", $url['scheme'], $url['host'], $path, $file);
 
         return $this;
     }
