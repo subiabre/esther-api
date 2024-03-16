@@ -22,9 +22,10 @@ class StorageStateProcessor implements ProcessorInterface
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Storage
     {
         $driver = $this->storageLocator->getDriverByName($uriVariables['name']);
+        $storage = $this->storageManager->get($uriVariables['name']);
 
         $data->setConfig(\array_intersect_key(
-            $data->getConfig(),
+            \array_merge($storage->getConfig(), $data->getConfig()),
             $driver::getConfiguration()
         ));
 
