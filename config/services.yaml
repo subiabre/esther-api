@@ -32,6 +32,10 @@ services:
         arguments:
             - !tagged 'app.storage.driver'
 
+    App\Storage\StorageManager:
+        arguments:
+            - '%kernel.project_dir%'
+
     App\Storage\LocalDriver:
         arguments:
             - '%kernel.project_dir%'
