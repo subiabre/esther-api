@@ -18,6 +18,14 @@ class StorageLocator
         $this->drivers = \iterator_to_array($drivers);
     }
 
+    /**
+     * @return DriverInterface[]
+     */
+    public function getDrivers(): array
+    {
+        return $this->drivers;
+    }
+
     public function getDriver(): DriverInterface
     {
         return $this->drivers[0];
