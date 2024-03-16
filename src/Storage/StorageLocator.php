@@ -31,6 +31,19 @@ class StorageLocator
         return $this->drivers[0];
     }
 
+    public function getDriverByName(string $name): ?DriverInterface
+    {
+        $result = null;
+
+        foreach ($this->drivers as $driver) {
+            if ($driver::getName() === $name) {
+                $result = $driver;
+            }
+        }
+
+        return $result;
+    }
+
     public function getFilesystem(): Filesystem
     {
         $driver = $this->getDriver();

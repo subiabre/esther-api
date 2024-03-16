@@ -47,6 +47,16 @@ class LocalDriver implements DriverInterface
         $this->fullPath = $fullPath;
     }
 
+    public static function getName(): string
+    {
+        return 'local';
+    }
+
+    public static function getConfiguration(): array
+    {
+        return [];
+    }
+
     public function getAdapter(): FilesystemAdapter
     {
         return new LocalFilesystemAdapter($this->fullPath);

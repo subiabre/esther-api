@@ -21,12 +21,14 @@ class StorageStateProvider implements ProviderInterface
     {
         if ($operation instanceof GetCollection) {
             return array_map(function ($driver) {
-                $name = str_replace('driver', '', str_replace('app\\storage\\', '', strtolower($driver::class)));
+                $name = $driver::getName();
                 $storage = $this->storageManager->get($name);
 
                 if (!$storage) {
-                    $storage = new Storage($name, []);
-                    $this->storageManager->set($storage);
+                    $storage = $this->storageManager->set(new Storage(
+                        $name,
+                        $driver::getConfiguration()
+                    ));
                 }
 
                 return $storage;
