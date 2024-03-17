@@ -40,16 +40,16 @@ class Image
     private ?string $alt = null;
 
     #[API\ApiProperty(writable: false)]
-    #[ORM\ManyToOne(inversedBy: 'images')]
-    private ?Photo $photo = null;
-
-    #[API\ApiProperty(writable: false)]
     #[ORM\Embedded(class: ImageThumb::class)]
     private ?ImageThumb $thumb;
 
     #[API\ApiProperty(writable: false)]
     #[ORM\Embedded(class: ImageMetadata::class)]
     private ?ImageMetadata $metadata = null;
+
+    #[API\ApiProperty(writable: false)]
+    #[ORM\ManyToOne(inversedBy: 'images')]
+    private ?Photo $photo = null;
 
     public function getId(): ?int
     {
@@ -72,6 +72,11 @@ class Image
         return $this;
     }
 
+    public function getSrcFilename(): ?string
+    {
+        return \urldecode(\pathinfo($this->src)['filename']);
+    }
+
     public function getAlt(): ?string
     {
         return $this->alt;
@@ -80,18 +85,6 @@ class Image
     public function setAlt(?string $alt): static
     {
         $this->alt = $alt;
-
-        return $this;
-    }
-
-    public function getPhoto(): ?Photo
-    {
-        return $this->photo;
-    }
-
-    public function setPhoto(?Photo $photo): static
-    {
-        $this->photo = $photo;
 
         return $this;
     }
@@ -119,4 +112,17 @@ class Image
 
         return $this;
     }
+
+    public function getPhoto(): ?Photo
+    {
+        return $this->photo;
+    }
+
+    public function setPhoto(?Photo $photo): static
+    {
+        $this->photo = $photo;
+
+        return $this;
+    }
+
 }
