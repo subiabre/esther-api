@@ -13,21 +13,34 @@ class ImageMetadataService
 
         $imginfo = \getimagesize($src);
         $headers = $this->getHeaders($src);
+        $exif = $this->getExif($src);
 
-        $filesize = 0;
+        $filesize = $imginfo[0] * $imginfo[1] * $imginfo["bits"];
+
         if (\array_key_exists('content-length', $headers)) {
             $filesize = $headers['content-length'];
-        } else {
-            $filesize = $imginfo[0] * $imginfo[1] * $imginfo["bits"];
+        }
+
+        $filedate = new \DateTime();
+
+        if (\array_key_exists('last-modified', $headers)) {
+            $filedate = \DateTimeImmutable::createFromFormat(
+                \DateTime::RFC7231,
+                $headers['last-modified']
+            );
+        }
+
+        if ($exifdate = $this->getExifData($exif, 'EXIF', 'DateTimeOriginal')) {
+            $filedate = new \DateTimeImmutable($exifdate);
         }
 
         return new ImageMetadata(
             $imginfo[0],
             $imginfo[1],
-            $filesize,
             $imginfo['mime'],
-            $this->getLastModified($headers),
-            $this->getExif($src)
+            $filesize,
+            $filedate,
+            $exif,
         );
     }
 
@@ -39,18 +52,6 @@ class ImageMetadataService
         }
 
         return $headers;
-    }
-
-    private function getLastModified(array $headers): ?\DateTimeImmutable
-    {
-        if (!\array_key_exists('last-modified', $headers)) {
-            return null;
-        }
-
-        return \DateTimeImmutable::createFromFormat(
-            \DateTime::RFC7231,
-            $headers['last-modified']
-        );
     }
 
     private function getExif(string $src): array
@@ -74,6 +75,20 @@ class ImageMetadataService
             $data[$key] = (is_array($value))
                 ? $this->cleanExif($value)
                 : trim(mb_convert_encoding($value, 'UTF-8'));
+        }
+
+        return $data;
+    }
+
+    private function getExifData(array $exif, string ...$keys)
+    {
+        $data = $exif;
+        foreach ($keys as $key) {
+            if (!array_key_exists($key, $data)) {
+                return null;
+            }
+
+            $data = $data[$key];
         }
 
         return $data;
