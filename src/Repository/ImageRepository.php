@@ -21,6 +21,18 @@ class ImageRepository extends ServiceEntityRepository
         parent::__construct($registry, Image::class);
     }
 
+    /**
+     * @return Image[] Returns Images without a Photo
+     */
+    public function findDangling(): array
+    {
+        return $this->createQueryBuilder('i')
+            ->andWhere('i.photo IS NULL')
+            ->orderBy('i.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Image[] Returns an array of Image objects
     //     */
