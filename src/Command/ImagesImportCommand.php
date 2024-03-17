@@ -20,10 +20,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'app:storage:import',
-    description: 'Import the images in a storage into the API.',
+    name: 'app:images:import',
+    description: 'Import Image resources',
 )]
-class StorageImportCommand extends Command
+class ImagesImportCommand extends Command
 {
     public function __construct(
         private StorageLocator $storageLocator,
@@ -38,36 +38,43 @@ class StorageImportCommand extends Command
     protected function configure(): void
     {
         $this->addArgument(
-            'source',
+            'storage',
             InputArgument::REQUIRED,
-            'The storage from which to import images.'
+            'The storage from which to import Images.'
         );
+
         $this->addArgument(
             'location',
             InputArgument::OPTIONAL,
-            'The path of the images inside the storage.',
+            'The path of the Images inside the storage.',
             ''
         );
 
         $this->addOption(
-            'images-update',
+            'update',
             null,
             InputOption::VALUE_NONE,
-            'Update the already present Images from the storage'
+            'Update the already present Images from the storage, will override data'
+        );
+
+        $this->addOption(
+            'filename-alt',
+            null,
+            InputOption::VALUE_NONE,
+            'Use the Image filename as alt text'
         );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $name = $input->getArgument('source');
 
-        $filesystem = $this->storageLocator->getFilesystem($name);
-        $listing = $filesystem->listContents($input->getArgument('location'));
+        $storage = $this->storageLocator->getFilesystem($input->getArgument('storage'));
+        $listing = $storage->listContents($input->getArgument('location'));
 
         $importedTotal = 0;
         foreach ($listing as $item) {
-            $src = $this->getSrc($filesystem, $item);
+            $src = $this->getSrc($storage, $item);
 
             if (!ImageFileValidator::isImage($src)) {
                 continue;
@@ -76,7 +83,7 @@ class StorageImportCommand extends Command
             $image = $this->imageRepository->findOneBySrc($src);
             $imageExists = $image ? true : false;
 
-            if ($imageExists && !$input->getOption('images-update')) {
+            if ($imageExists && !$input->getOption('update')) {
                 continue;
             }
 
@@ -87,6 +94,10 @@ class StorageImportCommand extends Command
 
             $image->setThumb($this->imageManipulationService->generateImageThumb($image));
             $image->setMetadata($this->imageMetadataService->generateImageMetadata($image));
+
+            if ($input->getOption('filename-alt')) {
+                $image->setAlt($image->getSrcFilename());
+            }
 
             $this->entityManager->persist($image);
             $importedTotal++;
@@ -100,15 +111,15 @@ class StorageImportCommand extends Command
 
         $this->entityManager->flush();
 
-        $io->success(sprintf("Imported %d images from %s", $importedTotal, rtrim($filesystem->publicUrl('0'), '0')));
+        $io->success(sprintf("Imported %d images from %s", $importedTotal, rtrim($storage->publicUrl('0'), '0')));
 
         return Command::SUCCESS;
     }
 
-    private function getSrc(Filesystem $filesystem, StorageAttributes $item): string
+    private function getSrc(Filesystem $storage, StorageAttributes $item): string
     {
         $image = new Image;
-        $image->setSrc($filesystem->publicUrl($item->path()));
+        $image->setSrc($storage->publicUrl($item->path()));
 
         return $image->getSrc();
     }
