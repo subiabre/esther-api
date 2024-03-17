@@ -91,7 +91,11 @@ class StorageImportCommand extends Command
             $this->entityManager->persist($image);
             $importedTotal++;
 
-            $io->writeln(sprintf("Imported %s", $src));
+            $io->writeln(sprintf(
+                "Importing <comment>%s</comment> [%s]",
+                $image->getSrcFilename(),
+                $image->getSrc()
+            ));
         }
 
         $this->entityManager->flush();
