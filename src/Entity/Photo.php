@@ -114,6 +114,13 @@ class Photo implements Loggable
         return $this->images;
     }
 
+    public function setImages(Collection $images): static
+    {
+        $this->images = $images;
+
+        return $this;
+    }
+
     public function addImage(Image $image): static
     {
         if (!$this->images->contains($image)) {

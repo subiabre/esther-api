@@ -20,9 +20,13 @@ class PhotoDateRange
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $max = null;
 
-    public function __construct()
+    public function __construct(
+        ?\DateTimeInterface $min = null,
+        ?\DateTimeInterface $max = null
+    )
     {
-        $this->max = new \DateTime();
+        $this->min = $min;
+        $this->max = $max ?? new \DateTime();
     }
 
     public function getMin(): ?\DateTimeInterface
