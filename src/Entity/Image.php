@@ -6,6 +6,7 @@ use ApiPlatform\Metadata as API;
 use App\Entity\Trait\TimestampableCreation;
 use App\Entity\Trait\TimestampableUpdation;
 use App\Repository\ImageRepository;
+use App\Service\RoutesService;
 use App\State\ImageStateProcessor;
 use App\Validator\ImageFile;
 use Doctrine\DBAL\Types\Types;
@@ -63,11 +64,7 @@ class Image
 
     public function setSrc(string $src): static
     {
-        $url = parse_url($src);
-        $path = str_replace(basename($url['path']), '', $url['path']);
-        $file = urlencode(urldecode(basename($url['path'])));
-
-        $this->src = sprintf("%s://%s%s%s", $url['scheme'], $url['host'], $path, $file);
+        $this->src = RoutesService::normalizeUrl($src);
 
         return $this;
     }

@@ -6,11 +6,10 @@ use App\Entity\Image;
 use App\Repository\ImageRepository;
 use App\Service\ImageManipulationService;
 use App\Service\ImageMetadataService;
+use App\Service\RoutesService;
 use App\Storage\StorageLocator;
 use App\Validator\ImageFileValidator;
 use Doctrine\ORM\EntityManagerInterface;
-use League\Flysystem\Filesystem;
-use League\Flysystem\StorageAttributes;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -74,7 +73,7 @@ class ImagesImportCommand extends Command
 
         $importedTotal = 0;
         foreach ($listing as $item) {
-            $src = $this->getSrc($storage, $item);
+            $src = RoutesService::normalizeUrl($storage->publicUrl($item->path()));
 
             if (!ImageFileValidator::isImage($src)) {
                 continue;
@@ -114,13 +113,5 @@ class ImagesImportCommand extends Command
         $io->success(sprintf("Imported %d images from %s", $importedTotal, rtrim($storage->publicUrl('0'), '0')));
 
         return Command::SUCCESS;
-    }
-
-    private function getSrc(Filesystem $storage, StorageAttributes $item): string
-    {
-        $image = new Image;
-        $image->setSrc($storage->publicUrl($item->path()));
-
-        return $image->getSrc();
     }
 }

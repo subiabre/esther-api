@@ -3,21 +3,16 @@
 namespace App\Storage;
 
 use App\ApiResource\Storage;
+use App\Service\RoutesService;
 
 class StorageManager
 {
     private string $configDir;
 
     public function __construct(
-        private string $rootDir
+        private RoutesService $routesService
     ) {
-        $configDir = sprintf(
-            "%s%svar%s%s",
-            \rtrim($this->rootDir, '\/'),
-            \DIRECTORY_SEPARATOR,
-            \DIRECTORY_SEPARATOR,
-            "storage"
-        );
+        $configDir = $this->routesService->buildAbsolutePath('var', 'storage');
 
         if (!\file_exists($configDir)) {
             \mkdir($configDir, 0777, true);
