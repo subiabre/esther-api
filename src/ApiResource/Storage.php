@@ -6,8 +6,15 @@ use ApiPlatform\Metadata as API;
 use App\State\StorageStateProcessor;
 use App\State\StorageStateProvider;
 
-#[API\GetCollection(provider: StorageStateProvider::class)]
-#[API\Patch(provider: StorageStateProvider::class, processor: StorageStateProcessor::class)]
+#[API\GetCollection(
+    provider: StorageStateProvider::class,
+    security: "is_granted('ROLE_ADMIN')"
+)]
+#[API\Patch(
+    provider: StorageStateProvider::class,
+    processor: StorageStateProcessor::class,
+    security: "is_granted('ROLE_ADMIN')"
+)]
 class Storage
 {
     public function __construct(
