@@ -18,8 +18,13 @@ class PhotoScopesExtension implements QueryCollectionExtensionInterface
     ) {
     }
 
-    public function applyToCollection(QueryBuilder $queryBuilder, QueryNameGeneratorInterface $queryNameGenerator, string $resourceClass, ?Operation $operation = null, array $context = []): void
-    {
+    public function applyToCollection(
+        QueryBuilder $queryBuilder,
+        QueryNameGeneratorInterface $queryNameGenerator,
+        string $resourceClass,
+        ?Operation $operation = null,
+        array $context = []
+    ): void {
         if (
             $resourceClass !== Photo::class ||
             $this->security->isGranted('ROLE_ADMIN') ||

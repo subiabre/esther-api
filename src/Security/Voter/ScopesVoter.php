@@ -20,7 +20,7 @@ class ScopesVoter extends Voter
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
     {
-        /** @var null|User */
+        /** @var User|null */
         $user = $token->getUser();
 
         if (!$user instanceof UserInterface) {

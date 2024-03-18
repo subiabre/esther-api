@@ -22,7 +22,6 @@ final class PhotoDateRangeFilter extends AbstractFilter
         ?Operation $operation = null,
         array $context = []
     ): void {
-        // otherwise filter is applied to order and page as well
         if (
             !is_array($values) ||
             !$this->isPropertyEnabled($property, $resourceClass)
@@ -33,13 +32,13 @@ final class PhotoDateRangeFilter extends AbstractFilter
         if (isset($values[self::PARAMETER_MIN])) {
             $value = $values[self::PARAMETER_MIN];
 
-            $this->addWhere($property, '>=', $value, $queryBuilder, $queryNameGenerator, $resourceClass);
+            $this->addWhere($property, '>=', $value, $queryBuilder, $queryNameGenerator);
         }
 
         if (isset($values[self::PARAMETER_MAX])) {
             $value = $values[self::PARAMETER_MAX];
 
-            $this->addWhere($property, '<=', $value, $queryBuilder, $queryNameGenerator, $resourceClass);
+            $this->addWhere($property, '<=', $value, $queryBuilder, $queryNameGenerator);
         }
     }
 
@@ -48,8 +47,7 @@ final class PhotoDateRangeFilter extends AbstractFilter
         string $operator,
         string $value,
         QueryBuilder $queryBuilder,
-        QueryNameGeneratorInterface $queryNameGenerator,
-        string $resourceClass
+        QueryNameGeneratorInterface $queryNameGenerator
     ) {
         $alias = $queryBuilder->getRootAliases()[0];
         $parameterName = $queryNameGenerator->generateParameterName($property);

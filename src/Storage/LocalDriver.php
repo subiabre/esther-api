@@ -22,8 +22,8 @@ class LocalDriver implements DriverInterface
         $fullPath = \sprintf(
             "%s%spublic%s%s",
             \rtrim($this->rootDir, '\/'),
-            DIRECTORY_SEPARATOR,
-            DIRECTORY_SEPARATOR,
+            \DIRECTORY_SEPARATOR,
+            \DIRECTORY_SEPARATOR,
             $relPath
         );
 

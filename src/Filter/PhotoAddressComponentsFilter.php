@@ -20,7 +20,6 @@ final class PhotoAddressComponentsFilter extends AbstractFilter
         ?Operation $operation = null,
         array $context = []
     ): void {
-        // otherwise filter is applied to order and page as well
         if (
             !is_array($values) ||
             !$this->isPropertyEnabled($property, $resourceClass)
@@ -72,8 +71,7 @@ final class PhotoAddressComponentsFilter extends AbstractFilter
                         ->orWhere($where)
                         ->setParameter($parameterName, json_encode($components[1]));
                     break;
-                case 'and';
-                default:
+                case 'and':
                     $queryBuilder
                         ->andWhere($where)
                         ->setParameter($parameterName, json_encode($components[1]));

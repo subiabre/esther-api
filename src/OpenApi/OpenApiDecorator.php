@@ -22,7 +22,7 @@ class OpenApiDecorator implements OpenApiFactoryInterface
 
         $openApi = $openApi->withServers([
             new Model\Server('/'),
-            new Model\Server('http://{{api}}/v1')
+            new Model\Server('{{api}}/v1')
         ]);
 
         $securitySchemes = $openApi->getComponents()->getSecuritySchemes() ?: new \ArrayObject();
