@@ -31,13 +31,14 @@ final class PhotoAddressComponentsFilter extends AbstractFilter
             return;
         }
 
+        $strategy = 'and';
         $values = $values[self::FILTER_NAME];
-        if (\is_array($values)) {
-            foreach ($values as $key => $value) {
-                $this->addWhere($value, $property, 'or', $queryBuilder, $queryNameGenerator);
-            }
-        } else {
-            $this->addWhere($values, $property, 'and', $queryBuilder, $queryNameGenerator);
+        if (\is_array($values) && count($values) > 1) {
+            $strategy = 'or';
+        }
+
+        foreach ($values as $key => $value) {
+            $this->addWhere($value, $property, $strategy, $queryBuilder, $queryNameGenerator);
         }
     }
 
@@ -89,6 +90,7 @@ final class PhotoAddressComponentsFilter extends AbstractFilter
                     'property' => $property,
                     'type' => 'array',
                     'required' => false,
+                    'is_collection' => true,
                     'description' => 'Filter collection by address components key-value pairs.',
                     'openapi' => [
                         'allowReserved' => false,
