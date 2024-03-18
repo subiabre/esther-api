@@ -37,7 +37,7 @@ class PhotosInferCommand extends Command
             null,
             InputOption::VALUE_OPTIONAL,
             'Match score threshold to consider a possible Image Photo group',
-            90
+            0.2
         );
 
         $this->addOption(
@@ -105,9 +105,12 @@ class PhotosInferCommand extends Command
             );
 
             if (count($imageMatches) > 0) {
-                $imageMatches->add("None");
+                $io->writeln("Found possible Image relationships via filename.");
 
-                $imageMatchesQuestion = new ChoiceQuestion("This Photo could also include", $imageMatches->toArray());
+                $imageMatchesQuestion = new ChoiceQuestion(
+                    "This image could be added to the Photo along with",
+                    [...$imageMatches, "None"]
+                );
                 $imageMatchesQuestion->setMultiselect(true);
 
                 $imagesMatched = $io->askQuestion($imageMatchesQuestion);

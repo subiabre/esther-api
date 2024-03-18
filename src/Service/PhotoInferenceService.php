@@ -4,66 +4,50 @@ namespace App\Service;
 
 use App\Entity\Image;
 use App\Entity\Photo;
-use FuzzyWuzzy\Process;
+use Fuse\Fuse;
 
 class PhotoInferenceService
 {
     /**
      * @param Photo $photo
      * @param Image[] $images
-     * @return \FuzzyWuzzy\Collection
+     * @return array
      */
     public function matchPhotoImages(
         Photo $photo,
         array $images,
-        int $threshold = 90
-    ): \FuzzyWuzzy\Collection {
+        float $threshold = 0.2
+    ): array {
         $needle = $photo->getImages()[0];
 
-        $imagesAsChoices = [];
-        $imagesByFilename = [];
-
+        $choices = [];
         foreach ($images as $image) {
-            $filename = $image->getSrcFilename();
-
-            $imagesByFilename[$filename] = $image;
-
-            if ($image->getId() !== $needle->getId()) {
-                $imagesAsChoices[] = $filename;
+            if ($image->getId() === $needle->getId()) {
+                continue;
             }
+
+            $filename = $image->getSrcFilename();
+            $choices[$filename] = [
+                'filename' => $filename,
+                'image' => $image
+            ];
         }
 
-        \asort($imagesAsChoices);
+        \ksort($choices);
 
-        $process = new Process();
-        $matches = $process->extract($needle->getSrcFilename(), $imagesAsChoices);
-        $matches = $matches->filter(function ($match) use ($threshold) {
-            return $match[1] > $threshold;
-        });
+        $fuse = new Fuse(
+            \array_values($choices),
+            [
+                'includeScore' => true,
+                'minMatchCharLength' => 3,
+                'shouldSort' => true,
+                'threshold' => $threshold,
+                'keys' => ['filename']
+            ]
+        );
 
-        return $matches->map(function ($match) use ($imagesByFilename) {
-            return new class($match, $imagesByFilename)
-            {
-                public readonly int $score;
-
-                public readonly Image $image;
-
-                public function __construct($match, $images)
-                {
-                    $this->score = $match[1];
-                    $this->image = $images[$match[0]];
-                }
-
-                public function __toString()
-                {
-                    return sprintf(
-                        "<comment>%s</comment> (%s%%) [%s]",
-                        $this->image->getSrcFilename(),
-                        $this->score,
-                        $this->image->getSrc()
-                    );
-                }
-            };
-        });
+        return \array_map(function ($match) {
+            return new PhotoInferenceImageMatch($match['item']['image']);
+        }, $fuse->search($needle->getSrcFilename()));
     }
 }
