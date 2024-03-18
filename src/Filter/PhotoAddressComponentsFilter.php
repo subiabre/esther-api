@@ -50,34 +50,37 @@ final class PhotoAddressComponentsFilter extends AbstractFilter
         QueryNameGeneratorInterface $queryNameGenerator,
     ) {
         $values = explode(';', $value);
+
+        $address = [];
         foreach ($values as $value) {
             if (empty($value)) continue;
 
-            $alias = $queryBuilder->getRootAliases()[0];
             $components = array_map('trim', explode(':', $value));
-            $propertyName = sprintf("%s.components", $property);
-            $parameterName = $queryNameGenerator->generateParameterName($propertyName);
+            $address[$components[0]] = $components[1];
+        }
 
-            $where = sprintf(
-                "JSON_CONTAINS(%s.%s, :%s, '$.%s') = 1",
-                $alias,
-                $propertyName,
-                $parameterName,
-                $components[0]
-            );
+        $alias = $queryBuilder->getRootAliases()[0];
+        $propertyName = sprintf("%s.components", $property);
+        $parameterName = $queryNameGenerator->generateParameterName($propertyName);
 
-            switch ($strategy) {
-                case 'or':
-                    $queryBuilder
-                        ->orWhere($where)
-                        ->setParameter($parameterName, json_encode($components[1]));
-                    break;
-                case 'and':
-                    $queryBuilder
-                        ->andWhere($where)
-                        ->setParameter($parameterName, json_encode($components[1]));
-                    break;
-            }
+        $where = sprintf(
+            "JSON_CONTAINS(%s.%s, :%s) = 1",
+            $alias,
+            $propertyName,
+            $parameterName,
+        );
+
+        switch ($strategy) {
+            case 'or':
+                $queryBuilder
+                    ->orWhere($where)
+                    ->setParameter($parameterName, json_encode($address));
+                break;
+            case 'and':
+                $queryBuilder
+                    ->andWhere($where)
+                    ->setParameter($parameterName, json_encode($address));
+                break;
         }
     }
 
