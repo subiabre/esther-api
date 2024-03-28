@@ -17,6 +17,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\SerializedName;
 use Symfony\Component\Validator\Constraints as Assert;
 
+/**
+ * Someone who interacts with the API.
+ */
 #[UniqueEntity(fields: ['email'])]
 #[API\GetCollection(security: "is_granted('ROLE_USER')")]
 #[API\Post(
@@ -45,6 +48,9 @@ class User implements UserInterface, UserOwnedInterface, PasswordAuthenticatedUs
     #[ORM\Column]
     private ?int $id = null;
 
+    /**
+     * An email-compliant string identifying the User.
+     */
     #[Assert\Email()]
     #[Assert\NotBlank()]
     #[ORM\Column(length: 180, unique: true)]
@@ -57,6 +63,9 @@ class User implements UserInterface, UserOwnedInterface, PasswordAuthenticatedUs
     #[ORM\Column]
     private ?string $password = null;
 
+    /**
+     * A plain-text password that will be hashed by the API.
+     */
     #[Assert\NotBlank(['groups' => ['postValidation']])]
     #[Assert\Length(min: 12)]
     #[API\ApiProperty(readable: false)]
@@ -70,6 +79,9 @@ class User implements UserInterface, UserOwnedInterface, PasswordAuthenticatedUs
     #[ORM\Column]
     private array $roles = [];
 
+    /**
+     * The Sessions created with this User's credentials.
+     */
     #[API\ApiProperty(writable: false, security: "is_granted('USER_EDIT', object)")]
     #[ORM\OneToMany(targetEntity: Session::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $sessions;

@@ -14,6 +14,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
+/**
+ * Images exist in a 1:1 relation with an image file stored somewhere.
+ */
 #[UniqueEntity(fields: ['src'])]
 #[API\GetCollection(security: "is_granted('ROLE_USER')")]
 #[API\Post(security: "is_granted('ROLE_USER')", processor: ImageStateProcessor::class)]
@@ -32,22 +35,39 @@ class Image
     #[ORM\Column]
     private ?int $id = null;
 
+    /**
+     * Fully qualified path to the file.
+     */
+    #[Assert\NotBlank()]
     #[Assert\Url()]
     #[ImageFile()]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $src = null;
 
+    /**
+     * A descriptive text of the image,
+     * also used as the alternative text for the (non) displayed image.
+     */
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $alt = null;
 
+    /**
+     * A downscaled version of the Image's file, stored elsewhere.
+     */
     #[API\ApiProperty(writable: false)]
     #[ORM\Embedded(class: ImageThumb::class)]
     private ?ImageThumb $thumb;
 
+    /**
+     * ImageMetadata holds a mix of information sourced from an Image's file.
+     */
     #[API\ApiProperty(writable: false)]
     #[ORM\Embedded(class: ImageMetadata::class)]
     private ?ImageMetadata $metadata = null;
 
+    /**
+     * The Photo to which this Image belongs.
+     */
     #[API\ApiProperty(writable: false)]
     #[ORM\ManyToOne(inversedBy: 'images')]
     private ?Photo $photo = null;
@@ -121,5 +141,4 @@ class Image
 
         return $this;
     }
-
 }

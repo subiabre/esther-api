@@ -6,6 +6,9 @@ use ApiPlatform\Metadata as API;
 use App\State\StorageStateProcessor;
 use App\State\StorageStateProvider;
 
+/**
+ * Storages hold configuration necessary for the API to operate with an external storage service.
+ */
 #[API\GetCollection(
     provider: StorageStateProvider::class,
     security: "is_granted('ROLE_ADMIN')"
@@ -23,12 +26,18 @@ class Storage
     ) {
     }
 
+    /**
+     * Represents the underlying storage service.
+     */
     #[API\ApiProperty(identifier: true, writable: false)]
     public function getName(): string
     {
         return $this->name;
     }
 
+    /**
+     * A collection of key-value pairs for the Storage configuration options.
+     */
     public function getConfig(): array
     {
         return $this->config;
