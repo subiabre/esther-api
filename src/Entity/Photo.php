@@ -7,6 +7,7 @@ use ApiPlatform\Metadata as API;
 use App\Entity\Trait\TimestampableCreation;
 use App\Entity\Trait\TimestampableUpdation;
 use App\Filter\PhotoAddressComponentsFilter;
+use App\Filter\PhotoAddressKnownFilter;
 use App\Filter\PhotoDateOrderFilter;
 use App\Filter\PhotoDateRangeFilter;
 use App\Repository\PhotoRepository;
@@ -55,6 +56,7 @@ class Photo implements Loggable
      */
     #[Gedmo\Versioned]
     #[Assert\Valid()]
+    #[API\ApiFilter(PhotoAddressKnownFilter::class)]
     #[API\ApiFilter(PhotoAddressComponentsFilter::class)]
     #[ORM\Embedded(class: PhotoAddress::class)]
     private ?PhotoAddress $address = null;
