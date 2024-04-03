@@ -10,16 +10,16 @@ class PhotoAddress
 {
     public function __construct(
         #[ORM\Column(type: Types::STRING, nullable: true)]
-        public string $reference,
+        public ?string $fullName,
 
         #[ORM\Column(type: Types::STRING, nullable: true)]
-        public string $fullName,
-
-        #[ORM\Column(type: Types::STRING, nullable: true)]
-        public string $shortName,
+        public ?string $shortName,
 
         #[ORM\Column(type: Types::JSON, nullable: true)]
-        public array $components,
+        public ?array $components,
+
+        #[ORM\Column(type: Types::STRING, nullable: true)]
+        public ?string $reference,
     ) {
     }
 }
