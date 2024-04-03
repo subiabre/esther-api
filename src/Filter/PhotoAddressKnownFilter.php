@@ -37,7 +37,9 @@ final class PhotoAddressKnownFilter extends AbstractFilter
 
         if ($value === true) {
             $queryBuilder->andWhere(sprintf("%s.%s IS NOT NULL", $alias, $propertyName));
-        } else {
+        }
+
+        if ($value === false) {
             $queryBuilder->andWhere(sprintf("%s.%s IS NULL", $alias, $propertyName));
         }
     }
