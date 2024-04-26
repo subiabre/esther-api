@@ -9,6 +9,8 @@ use App\Repository\ImageRepository;
 use App\Service\RoutesService;
 use App\State\ImageStateProcessor;
 use App\Validator\ImageFile;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -58,6 +60,10 @@ class Image
     #[ORM\Embedded(class: ImageThumb::class)]
     private ?ImageThumb $thumb;
 
+    #[API\ApiProperty(readableLink: true)]
+    #[ORM\OneToMany(targetEntity: Portrait::class, mappedBy: 'image', orphanRemoval: true)]
+    private Collection $portraits;
+
     /**
      * ImageMetadata holds a mix of information sourced from an Image's file.
      */
@@ -71,6 +77,11 @@ class Image
     #[API\ApiProperty(writable: false)]
     #[ORM\ManyToOne(inversedBy: 'images')]
     private ?Photo $photo = null;
+
+    public function __construct()
+    {
+        $this->portraits = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -114,6 +125,36 @@ class Image
     public function setThumb(ImageThumb $thumb): static
     {
         $this->thumb = $thumb;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Portrait>
+     */
+    public function getPortraits(): Collection
+    {
+        return $this->portraits;
+    }
+
+    public function addPortrait(Portrait $portrait): static
+    {
+        if (!$this->portraits->contains($portrait)) {
+            $this->portraits->add($portrait);
+            $portrait->setImage($this);
+        }
+
+        return $this;
+    }
+
+    public function removePortrait(Portrait $portrait): static
+    {
+        if ($this->portraits->removeElement($portrait)) {
+            // set the owning side to null (unless already changed)
+            if ($portrait->getImage() === $this) {
+                $portrait->setImage(null);
+            }
+        }
 
         return $this;
     }
