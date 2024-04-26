@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\Image;
 use App\Entity\ImageThumb;
+use App\Entity\Portrait;
 use App\Storage\StorageLocator;
 use Intervention\Image\Drivers\Imagick\Driver as ImagickDriver;
 use Intervention\Image\ImageManager;
@@ -13,6 +14,9 @@ class ImageManipulationService
 {
     public const IMAGE_RESIZED_QUALITY = 96;
     public const IMAGE_RESIZED_FILENAME = 'resized';
+
+    public const IMAGE_CROPPED_QUALITY = 98;
+    public const IMAGE_CROPPED_FILENAME = 'cropped';
 
     private Filesystem $storage;
     private ImageManager $manager;
@@ -44,5 +48,37 @@ class ImageManipulationService
         $thumb->setHeight($data->height());
 
         return $thumb;
+    }
+
+    public function crop(
+        Image $image,
+        int $width,
+        int $height,
+        int $offsetX,
+        int $offsetY,
+        int $maxWidth = 200
+    ): string {
+        $crop = [
+            $width,
+            $height,
+            $offsetX,
+            $offsetY
+        ];
+
+        $data = \fopen($image->getSrc(), 'r');
+        $data = $this->manager->read($data)->crop(...$crop)->scaleDown($maxWidth);
+
+        $path = sprintf(
+            "%s_%s.webp",
+            self::IMAGE_CROPPED_FILENAME,
+            hash('md5', join('', [$image->getSrc(), ...$crop]))
+        );
+
+        $this->storage->writeStream(
+            $path,
+            $data->toWebp(self::IMAGE_RESIZED_QUALITY)->toFilePointer()
+        );
+
+        return $this->storage->publicUrl($path);
     }
 }
