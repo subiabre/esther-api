@@ -12,6 +12,8 @@ services:
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
 
     _instanceof:
+        App\Configurable\ConfigurableInterface:
+            tags: ['app.configurable']
         App\Storage\DriverInterface:
             tags: ['app.storage.driver']
 
@@ -23,6 +25,10 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+
+    App\Configurable\ConfigurableLocator:
+        arguments:
+            - !tagged 'app.configurable'
 
     App\Service\AuthenticationService:
         arguments:
