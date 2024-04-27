@@ -14,6 +14,10 @@ services:
     _instanceof:
         App\Configurable\ConfigurableInterface:
             tags: ['app.configurable']
+
+        App\Service\VisionInterface:
+            tags: ['app.service.vision']
+
         App\Storage\DriverInterface:
             tags: ['app.storage.driver']
 
@@ -33,6 +37,10 @@ services:
     App\Service\AuthenticationService:
         arguments:
             - '%env(APP_SECRET)%'
+
+    App\Service\ImageVisionService:
+        arguments:
+            - !tagged 'app.service.vision'
 
     App\Service\RoutesService:
         arguments:
