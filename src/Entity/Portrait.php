@@ -8,29 +8,12 @@ use App\State\PortraitStateProcessor;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[API\ApiResource(
-    uriTemplate: '/image/{id}/portraits',
-    uriVariables: [
-        'id' => new API\Link(fromClass: Image::class, toProperty: 'image')
-    ],
-    operations: [
-        new API\GetCollection(),
-        new API\Post(processor: PortraitStateProcessor::class)
-    ]
-)]
-#[API\ApiResource(
-    uriTemplate: '/image/{id}/portraits/{portraitId}',
-    uriVariables: [
-        'id' => new API\Link(fromClass: Image::class, toProperty: 'image'),
-        'portraitId' => new API\Link(fromClass: Portrait::class, toProperty: 'id')
-    ],
-    operations: [
-        new API\Get(),
-        new API\Put(),
-        new API\Delete(),
-        new API\Patch()
-    ]
-)]
+#[API\GetCollection()]
+#[API\Post(processor: PortraitStateProcessor::class)]
+#[API\Get()]
+#[API\Put()]
+#[API\Delete()]
+#[API\Patch()]
 #[ORM\Entity(repositoryClass: PortraitRepository::class)]
 class Portrait
 {
@@ -58,6 +41,9 @@ class Portrait
     #[ORM\ManyToOne(inversedBy: 'portraits')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Image $image = null;
+
+    #[ORM\ManyToOne(inversedBy: 'portraits')]
+    private ?Person $person = null;
 
     public function getId(): ?int
     {
@@ -132,6 +118,18 @@ class Portrait
     public function setImage(?Image $image): static
     {
         $this->image = $image;
+
+        return $this;
+    }
+
+    public function getPerson(): ?Person
+    {
+        return $this->person;
+    }
+
+    public function setPerson(?Person $person): static
+    {
+        $this->person = $person;
 
         return $this;
     }
