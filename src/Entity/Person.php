@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata as API;
 use App\Repository\PersonRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -18,6 +19,7 @@ class Person
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[API\ApiFilter(SearchFilter::class, properties: ['name' => 'partial'])]
     private ?string $name = null;
 
     #[API\ApiProperty(writable: false)]
