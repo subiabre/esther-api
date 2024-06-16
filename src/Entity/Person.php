@@ -22,7 +22,6 @@ class Person
     #[API\ApiFilter(SearchFilter::class, properties: ['name' => 'partial'])]
     private ?string $name = null;
 
-    #[API\ApiProperty(writable: false)]
     #[ORM\OneToMany(targetEntity: Portrait::class, mappedBy: 'person')]
     private Collection $portraits;
 
