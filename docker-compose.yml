@@ -3,7 +3,7 @@ services:
     build:
       context: docker/php
       args:
-        PHP_VERSION: ${PHP_VERSION:-8.3}
+        PHP_VERSION: ${PHP_VERSION:-8.2.19}
     container_name: esther-api-php
     volumes:
       - .:/app
