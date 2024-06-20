@@ -77,7 +77,7 @@ class Photo implements Loggable
     #[Assert\Count(min: 1)]
     #[API\ApiFilter(
         SearchFilter::class,
-        properties: ['images.alt' => 'partial'],
+        properties: ['images.alt' => 'partial', 'images.portraits.person'],
     )]
     #[ORM\OneToMany(
         targetEntity: Image::class,
