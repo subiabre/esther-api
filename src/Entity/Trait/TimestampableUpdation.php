@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 trait TimestampableUpdation
 {
     #[API\ApiProperty(writable: false)]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     protected $dateUpdated;
 
     public function getDateUpdated()
