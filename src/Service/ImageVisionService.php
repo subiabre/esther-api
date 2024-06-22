@@ -9,7 +9,7 @@ use App\Entity\Portrait;
 class ImageVisionService
 {
     /** @var VisionInterface[] */
-    private array $visions;
+    private array $visions = [];
 
     public function __construct(
         iterable $instanceof
