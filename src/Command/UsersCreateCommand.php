@@ -23,8 +23,7 @@ class UsersCreateCommand extends Command
     public function __construct(
         private EntityManagerInterface $entityManager,
         private UserPasswordHasherInterface $userPasswordHasher
-    )
-    {
+    ) {
         parent::__construct();
     }
 
@@ -33,8 +32,7 @@ class UsersCreateCommand extends Command
         $this
             ->addArgument('email', InputArgument::REQUIRED)
             ->addArgument('password', InputArgument::REQUIRED)
-            ->addOption('add-role', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY)
-        ;
+            ->addOption('add-role', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -42,7 +40,7 @@ class UsersCreateCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $user = new User;
-        $user->setRoles($input->getOption('add-role') ?: []);
+        $user->setRoles($input->getOption('add-role'));
         $user->setEmail($input->getArgument('email'));
         $user->setPassword($this->userPasswordHasher->hashPassword($user, $input->getArgument('password')));
 
