@@ -14,15 +14,12 @@ use App\Repository\PhotoRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Gedmo\Loggable\Loggable;
-use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Photos are displayable, filterable and sortable collections of related Images.
  * e.g. Digital scans of the two sides of an analogic photo.
  */
-#[Gedmo\Loggable()]
 #[API\GetCollection(security: "is_granted('ROLE_USER')")]
 #[API\Post(security: "is_granted('ROLE_USER')")]
 #[API\Get(security: "is_granted('SCOPE_VIEW', object)")]
@@ -30,7 +27,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[API\Delete(security: "is_granted('ROLE_USER')")]
 #[API\Patch(security: "is_granted('ROLE_USER')")]
 #[ORM\Entity(repositoryClass: PhotoRepository::class)]
-class Photo implements Loggable
+class Photo
 {
     use TimestampableCreation;
     use TimestampableUpdation;
@@ -43,7 +40,6 @@ class Photo implements Loggable
     /**
      * Photos are dated approximately between a range of dates.
      */
-    #[Gedmo\Versioned]
     #[Assert\Valid()]
     #[Assert\NotBlank()]
     #[API\ApiFilter(PhotoDateOrderFilter::class)]
@@ -54,7 +50,6 @@ class Photo implements Loggable
     /**
      * A breakdown of the address and the different components of the Photo's location.
      */
-    #[Gedmo\Versioned]
     #[Assert\Valid()]
     #[API\ApiFilter(PhotoAddressKnownFilter::class)]
     #[API\ApiFilter(PhotoAddressComponentsFilter::class)]
