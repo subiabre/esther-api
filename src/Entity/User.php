@@ -178,9 +178,25 @@ class User implements UserInterface, UserOwnedInterface, PasswordAuthenticatedUs
      */
     public function setRoles(array $roles): static
     {
-        $this->roles = $roles;
+        $this->roles = $this->parseRoleValues($roles);
 
         return $this;
+    }
+
+    private function parseRoleValues(array $input): array
+    {
+        $roles = [];
+        foreach ($input as $role) {
+            if (str_contains($role, ',')) {
+                $roles = [...$roles, ...explode(',', $role)];
+            } else {
+                $roles[] = $role;
+            }
+        }
+
+        return \array_map(function ($role) {
+            return sprintf("ROLE_%s", ltrim($role, "ROLE_"));
+        }, $roles);
     }
 
     public function hasRoles(array $roles): bool
