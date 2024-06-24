@@ -36,7 +36,7 @@ class PhotosInferCommand extends Command
             'match-min',
             null,
             InputOption::VALUE_OPTIONAL,
-            'Match score threshold to consider a possible Image Photo group',
+            'A threshold of 0.0 requires a perfect match (of both letters and location), a threshold of 1.0 would match anything',
             0.2
         );
 
@@ -109,7 +109,7 @@ class PhotosInferCommand extends Command
 
                 $imageMatchesQuestion = new ChoiceQuestion(
                     "This image could be added to the Photo along with",
-                    [...$imageMatches, "None"]
+                    ["None", ...$imageMatches]
                 );
                 $imageMatchesQuestion->setMultiselect(true);
 

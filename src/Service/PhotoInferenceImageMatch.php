@@ -6,17 +6,21 @@ use App\Entity\Image;
 
 class PhotoInferenceImageMatch
 {
+    public readonly Image $image;
+
     public function __construct(
-        public readonly Image $image
+        private array $match
     ) {
+        $this->image = $match['item']['image'];
     }
 
     public function __toString()
     {
         return sprintf(
-            "<comment>%s</comment> [%s]",
-            $this->image->getSrcFilename(),
-            $this->image->getSrc()
+            "<comment>%s</comment> [distance: %s] [src: %s]",
+            $this->match['item']['image']->getSrcFilename(),
+            $this->match['score'],
+            $this->match['item']['image']->getSrc(),
         );
     }
 }

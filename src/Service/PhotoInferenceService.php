@@ -47,7 +47,7 @@ class PhotoInferenceService
         );
 
         return \array_map(function ($match) {
-            return new PhotoInferenceImageMatch($match['item']['image']);
+            return new PhotoInferenceImageMatch($match);
         }, $fuse->search($needle->getSrcFilename()));
     }
 }
