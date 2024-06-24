@@ -102,7 +102,7 @@ class ImagesImportCommand extends Command
             $importedTotal++;
 
             $io->writeln(sprintf(
-                "Importing <comment>%s</comment> [%s]",
+                "Importing <comment>%s</comment> [src: %s]",
                 $image->getSrcFilename(),
                 $image->getSrc()
             ));

@@ -41,7 +41,7 @@ class ImagesAnalyzeCommand extends Command
 
         foreach ($images as $image) {
             $io->writeln(sprintf(
-                "Analyzing <comment>%s</comment> [%s]",
+                "Analyzing <comment>%s</comment> [src: %s]",
                 $image->getSrcFilename(),
                 $image->getSrc()
             ));
