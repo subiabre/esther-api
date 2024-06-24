@@ -74,7 +74,7 @@ class PhotosInferCommand extends Command
             }
 
             $io->writeln(sprintf(
-                "Inferring data from <comment>%s</comment> [%s]",
+                "Inferring data from <comment>%s</comment> [src: %s]",
                 $image->getSrcFilename(),
                 $image->getSrc()
             ));
