@@ -31,6 +31,12 @@ class ImagesAnalyzeCommand extends Command
 
     protected function configure(): void
     {
+        $this->addOption(
+            'dangling',
+            null,
+            InputOption::VALUE_NONE,
+            'Analyze Images without a Photo'
+        );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -38,6 +44,10 @@ class ImagesAnalyzeCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $images = $this->imageRepository->findAll();
+
+        if ($input->getOption('dangling')) {
+            $images = $this->imageRepository->findDangling();
+        }
 
         foreach ($images as $image) {
             $io->writeln(sprintf(
