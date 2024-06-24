@@ -91,7 +91,6 @@ class ImagesImportCommand extends Command
                 $image->setSrc($src);
             }
 
-            $image->setThumb($this->imageManipulationService->generateImageThumb($image));
             $image->setMetadata($this->imageMetadataService->generateImageMetadata($image));
 
             if ($input->getOption('filename-alt')) {
