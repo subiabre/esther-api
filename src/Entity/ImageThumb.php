@@ -8,13 +8,13 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Embeddable]
 class ImageThumb
 {
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $src = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $width = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $height = null;
 
     public function getSrc(): ?string
