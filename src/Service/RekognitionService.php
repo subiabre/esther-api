@@ -50,7 +50,7 @@ class RekognitionService implements VisionInterface, ConfigurableInterface
         if ($image->getMetadata()->filesize > self::IMAGE_MAX_SIZE) {
             $imageBytes = \file_get_contents($image->getThumb()->getSrc());
         } else {
-            $imageBytes = \file_get_contents($image->getSrc(), length: self::IMAGE_MAX_SIZE);
+            $imageBytes = \file_get_contents($image->getSrc());
         }
 
         $detections = $rekognition->detectFaces([
