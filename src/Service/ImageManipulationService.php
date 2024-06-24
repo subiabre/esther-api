@@ -75,7 +75,7 @@ class ImageManipulationService
 
         $this->storage->writeStream(
             $path,
-            $data->toWebp(self::IMAGE_RESIZED_QUALITY)->toFilePointer()
+            $data->toWebp(self::IMAGE_CROPPED_QUALITY)->toFilePointer()
         );
 
         return $this->storage->publicUrl($path);
