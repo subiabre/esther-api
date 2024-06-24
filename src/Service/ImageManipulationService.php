@@ -56,7 +56,6 @@ class ImageManipulationService
         int $height,
         int $offsetX,
         int $offsetY,
-        int $maxWidth = 200
     ): string {
         $crop = [
             $width,
@@ -66,7 +65,7 @@ class ImageManipulationService
         ];
 
         $data = \fopen($image->getSrc(), 'r');
-        $data = $this->manager->read($data)->crop(...$crop)->scaleDown($maxWidth);
+        $data = $this->manager->read($data)->crop(...$crop);
 
         $path = sprintf(
             "%s_%s.webp",
