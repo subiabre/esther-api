@@ -33,7 +33,8 @@ final class PhotoAddressComponentsFilter extends AbstractFilter
 
         $strategy = 'and';
         $values = $values[self::FILTER_NAME];
-        if (\is_array($values) && count($values) > 1) {
+
+        if (count($values) > 1) {
             $strategy = 'or';
         }
 
@@ -89,7 +90,7 @@ final class PhotoAddressComponentsFilter extends AbstractFilter
         $description = [];
         foreach ($this->properties as $property => $strategy) {
             $description += [
-                sprintf('%s[%s]', $property, self::FILTER_NAME) => [
+                sprintf('%s[%s][]', $property, self::FILTER_NAME) => [
                     'property' => $property,
                     'type' => 'array',
                     'required' => false,
