@@ -17,8 +17,8 @@ class ConsoleStyle extends SymfonyStyle
             ['email', $user->getEmail()],
             ['roles', join(', ', $user->getRoles())],
             ['sessions', $user->getSessions()->count()],
-            ['created', $user->getDateCreated()->format(\DateTime::RFC3339)],
-            ['updated', $user->getDateUpdated()->format(\DateTime::RFC3339)]
+            ['created', $user->getDateCreated()?->format(\DateTime::RFC3339)],
+            ['updated', $user->getDateUpdated()?->format(\DateTime::RFC3339)]
         ]);
     }
 }
