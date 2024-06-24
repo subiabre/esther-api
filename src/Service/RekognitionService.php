@@ -48,14 +48,16 @@ class RekognitionService implements VisionInterface, ConfigurableInterface
         $rekognition = new RekognitionClient($this->config);
 
         if ($image->getMetadata()->filesize > self::IMAGE_MAX_SIZE) {
-            $imageBytes = \file_get_contents($image->getThumb()->getSrc());
-        } else {
-            $imageBytes = \file_get_contents($image->getSrc());
+            return [];
+        }
+
+        if (!in_array($image->getMetadata()->mimeType, ['image/jpeg', 'image/png'])) {
+            return [];
         }
 
         $detections = $rekognition->detectFaces([
             'Image' => [
-                'Bytes' => $imageBytes
+                'Bytes' => \file_get_contents($image->getSrc())
             ],
             'Attributes' => ['DEFAULT']
         ])->toArray();
