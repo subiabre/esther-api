@@ -4,7 +4,6 @@ namespace App\Service;
 
 use App\Entity\Image;
 use App\Entity\ImageThumb;
-use App\Entity\Portrait;
 use App\Storage\StorageLocator;
 use Intervention\Image\Drivers\Imagick\Driver as ImagickDriver;
 use Intervention\Image\ImageManager;
@@ -18,13 +17,27 @@ class ImageManipulationService
     public const IMAGE_CROPPED_QUALITY = 98;
     public const IMAGE_CROPPED_FILENAME = 'cropped';
 
-    private Filesystem $storage;
     private ImageManager $manager;
+
+    private Filesystem $storage;
 
     public function __construct(StorageLocator $storageLocator)
     {
-        $this->storage = $storageLocator->getFilesystem();
         $this->manager = new ImageManager(new ImagickDriver);
+
+        $this->storage = $storageLocator->getFilesystem();
+    }
+
+    public function getStorage(): Filesystem
+    {
+        return $this->storage;
+    }
+
+    public function setStorage(Filesystem $storage): static
+    {
+        $this->storage = $storage;
+
+        return $this;
     }
 
     public function generateImageThumb(Image $image, int $width = 420): ImageThumb
