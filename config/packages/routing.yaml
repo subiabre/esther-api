@@ -4,7 +4,7 @@ framework:
 
         # Configure how to generate URLs in non-HTTP contexts, such as CLI commands.
         # See https://symfony.com/doc/current/routing.html#generating-urls-in-commands
-        default_uri: 'http://%env(APP_SERVER_NAME)%:%env(APP_HTTP_PORT)%'
+        default_uri: 'http://%env(APP_HTTP_ADDRESS)%'
 
 when@prod:
     framework:
