@@ -10,6 +10,7 @@ use Aws\Rekognition\RekognitionClient;
 class RekognitionService implements VisionInterface, ConfigurableInterface
 {
     public const FACE_BOX_MARGIN = 1.75;
+    public const IMAGE_MAX_SIZE = 5242880;
 
     private array $config;
 
@@ -46,9 +47,15 @@ class RekognitionService implements VisionInterface, ConfigurableInterface
     {
         $rekognition = new RekognitionClient($this->config);
 
+        if ($image->getMetadata()->filesize > self::IMAGE_MAX_SIZE) {
+            $imageBytes = \file_get_contents($image->getThumb()->getSrc());
+        } else {
+            $imageBytes = \file_get_contents($image->getSrc(), length: self::IMAGE_MAX_SIZE);
+        }
+
         $detections = $rekognition->detectFaces([
             'Image' => [
-                'Bytes' => \file_get_contents($image->getSrc())
+                'Bytes' => $imageBytes
             ],
             'Attributes' => ['DEFAULT']
         ])->toArray();
