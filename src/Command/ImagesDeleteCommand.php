@@ -66,8 +66,10 @@ class ImagesDeleteCommand extends Command
         }
 
         if ($input->getOption('all')) {
+            $images = $this->imageRepository->findAll();
+
             $removeAllQuestion = new ConfirmationQuestion(
-                "This will remove all existing Image records. Is that okay?",
+                sprintf("This will remove all %d existing Image records. Is that okay?", count($images)),
                 true
             );
             
@@ -76,6 +78,7 @@ class ImagesDeleteCommand extends Command
     
                 return Command::FAILURE;
             }
+
         }
 
         foreach ($images as $image) {
