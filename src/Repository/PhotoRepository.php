@@ -21,6 +21,22 @@ class PhotoRepository extends ServiceEntityRepository
         parent::__construct($registry, Photo::class);
     }
 
+    /**
+     * @return Photo[] Returns an array of Photo objects
+     */
+    public function findByRange(int $start, int $end): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.id >= :start')
+            ->andWhere('p.id <= :end')
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->orderBy('p.id', 'ASC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
     //    /**
     //     * @return Photo[] Returns an array of Photo objects
     //     */
