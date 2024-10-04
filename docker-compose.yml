@@ -8,9 +8,6 @@ services:
     volumes:
       - .:/app
       - ./docker/php/conf.d/opcache.ini:/usr/local/etc/php/conf.d/opcache.ini:ro
-    environment:
-      APP_HTTP_PORT: ${APP_HTTP_PORT:-8080}
-      APP_HTTPS_PORT: ${APP_HTTPS_PORT:-8433}
 
   nginx:
     image: nginx:${NGINX_VERSION:-1.24}
@@ -19,8 +16,8 @@ services:
       - .:/app
       - ./docker/nginx/conf.d:/etc/nginx/conf.d
     ports:
-      - "${APP_HTTP_PORT:-8080}:80"
-      - "${APP_HTTPS_PORT:-8433}:433"
+      - "${APP_HTTP_PORT:-3002}:80"
+      - "${APP_HTTPS_PORT:-3003}:433"
 
   mariadb:
     image: mariadb:${MARIADB_VERSION:-10.11}
