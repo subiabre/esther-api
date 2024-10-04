@@ -108,7 +108,10 @@ class PhotosInferCommand extends Command
                 $io->writeln("Found possible Image relationships via filename.");
 
                 $imageMatchesQuestion = new ChoiceQuestion(
-                    "This image could be added to the Photo along with",
+                    sprintf(
+                        " [?] The following image could be added to the Photo along with...\n  [i] <comment>%s</comment>",
+                        $image->getSrcFilename()
+                    ),
                     ["None", ...$imageMatches]
                 );
                 $imageMatchesQuestion->setMultiselect(true);
