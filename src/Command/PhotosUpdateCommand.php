@@ -102,6 +102,8 @@ class PhotosUpdateCommand extends Command
      */
     private function parseId(string $id): array
     {
+        $photos = $this->photoRepository->findBy(['id' => $id]);
+
         if (\preg_match('/^\d+\.\.\d+$/', $id)) {
             $ids = \explode('..', $id);
 
@@ -117,8 +119,6 @@ class PhotosUpdateCommand extends Command
 
             $photos = $this->photoRepository->findBy(['id' => $ids]);
         }
-
-        $photos = $this->photoRepository->findBy(['id' => $id]);
 
         return $photos;
     }
