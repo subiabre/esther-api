@@ -29,7 +29,7 @@ class PhotoScopesExtension implements QueryCollectionExtensionInterface
     ): void {
         if (
             !\in_array($resourceClass, [Photo::class, Portrait::class, Person::class,]) ||
-            // $this->security->isGranted('ROLE_ADMIN') ||
+            $this->security->isGranted('ROLE_ADMIN') ||
             null === $user = $this->security->getUser()
         ) {
             return;

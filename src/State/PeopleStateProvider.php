@@ -35,6 +35,10 @@ class PeopleStateProvider implements ProviderInterface
         if ($operation instanceof CollectionOperationInterface) {
             $people = $this->collectionProvider->provide($operation, $uriVariables, $context);
 
+            if ($this->security->isGranted('ROLE_ADMIN')) {
+                return $people;
+            }
+
             foreach ($people as $person) {
                 $person = $this->scopePortraits($user, $person);
             }
@@ -43,6 +47,10 @@ class PeopleStateProvider implements ProviderInterface
         }
 
         $person = $this->itemProvider->provide($operation, $uriVariables, $context);
+
+        if ($this->security->isGranted('ROLE_ADMIN')) {
+            return $person;
+        }
 
         return $this->scopePortraits($user, $person);
     }
