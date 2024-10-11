@@ -10,8 +10,7 @@ class AuthenticationService
 
     public function __construct(
         private string $appSecret
-    ) {
-    }
+    ) {}
 
     public function generateSessionToken(User $user): string
     {
@@ -24,5 +23,21 @@ class AuthenticationService
                 $user->getUserIdentifier()
             ])
         );
+    }
+
+    public static function parseRoles(array $input): array
+    {
+        $roles = [];
+        foreach ($input as $role) {
+            if (str_contains($role, ',')) {
+                $roles = [...$roles, ...explode(',', $role)];
+            } else {
+                $roles[] = $role;
+            }
+        }
+
+        return \array_map(function ($role) {
+            return \strtoupper(sprintf("ROLE_%s", ltrim($role, "ROLE_")));
+        }, \array_unique($roles));
     }
 }

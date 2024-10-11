@@ -7,6 +7,7 @@ use App\Entity\Interface\UserOwnedInterface;
 use App\Entity\Trait\TimestampableCreation;
 use App\Entity\Trait\TimestampableUpdation;
 use App\Repository\UserRepository;
+use App\Service\AuthenticationService;
 use App\State\UserPasswordProcessor;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -178,25 +179,9 @@ class User implements UserInterface, UserOwnedInterface, PasswordAuthenticatedUs
      */
     public function setRoles(array $roles): static
     {
-        $this->roles = $this->parseRoleValues($roles);
+        $this->roles = AuthenticationService::parseRoles($roles);
 
         return $this;
-    }
-
-    private function parseRoleValues(array $input): array
-    {
-        $roles = [];
-        foreach ($input as $role) {
-            if (str_contains($role, ',')) {
-                $roles = [...$roles, ...explode(',', $role)];
-            } else {
-                $roles[] = $role;
-            }
-        }
-
-        return \array_map(function ($role) {
-            return sprintf("ROLE_%s", ltrim($role, "ROLE_"));
-        }, $roles);
     }
 
     public function hasRoles(array $roles): bool
