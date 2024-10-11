@@ -126,7 +126,10 @@ class Photo
 
     public function addScope(PhotoScope $scope): static
     {
-        if (!$this->scopes->contains($scope)) {
+        if (
+            !$this->scopes->contains($scope) &&
+            !$this->hasScopeWithRole($scope->getRole())
+        ) {
             $this->scopes->add($scope);
             $scope->setPhoto($this);
         }
@@ -144,6 +147,13 @@ class Photo
         }
 
         return $this;
+    }
+
+    public function hasScopeWithRole(string $role): bool
+    {
+        return \in_array($role, \array_map(function (PhotoScope $scope) {
+            return $scope->getRole();
+        }, $this->scopes->toArray()));
     }
 
     /**
