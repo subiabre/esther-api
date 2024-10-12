@@ -61,6 +61,13 @@ class ImagesProcessCommand extends Command
             InputOption::VALUE_NONE,
             'Skip portraits generation process'
         );
+
+        $this->addOption(
+            'filename-alt',
+            null,
+            InputOption::VALUE_NONE,
+            'Use the Image filename as alt text'
+        );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -128,6 +135,12 @@ class ImagesProcessCommand extends Command
                 $io->progressAdvance();
             }
             $io->progressFinish();
+
+            if ($input->getOption('filename-alt')) {
+                $image->setAlt($image->getSrcFilename());
+            }
+
+            $this->entityManager->persist($image);
         }
 
         $this->entityManager->flush();
