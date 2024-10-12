@@ -71,21 +71,18 @@ class PhotosUpdateCommand extends Command
 
                 $rolesToAdd = $input->getOption('add-role');
                 if ($rolesToAdd) {
-                    foreach ($this->parseRoles($rolesToAdd) as $role) {
-                        $scope = new PhotoScope();
-                        $scope->setRole($role);
-
-                        $photo->addScope($scope);
-                    }
+                    $photo->setRoles(\array_unique([
+                        ...$photo->getRoles(),
+                        ...$this->parseRoles($rolesToAdd)
+                    ]));
                 }
 
                 $rolesToRemove = $input->getOption('remove-role');
                 if ($rolesToRemove) {
-                    foreach ($photo->getScopes() as $scope) {
-                        if (\in_array($scope->getRole(), $this->parseRoles($rolesToRemove))) {
-                            $photo->removeScope($scope);
-                        }
-                    }
+                    $photo->setRoles(\array_diff(
+                        $photo->getRoles(),
+                        $this->parseRoles($rolesToRemove)
+                    ));
                 }
 
                 $this->entityManager->persist($photo);
