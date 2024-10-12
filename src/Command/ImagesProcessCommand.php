@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Repository\ImageRepository;
 use App\Service\ImageManipulationService;
+use App\Service\ImageMetadataService;
 use App\Service\ImageVisionService;
 use App\Storage\StorageLocator;
 use Doctrine\ORM\EntityManagerInterface;
@@ -25,6 +26,7 @@ class ImagesProcessCommand extends Command
     public function __construct(
         private StorageLocator $storageLocator,
         private ImageRepository $imageRepository,
+        private ImageMetadataService $imageMetadataService,
         private ImageVisionService $imageVisionService,
         private ImageManipulationService $imageManipulationService,
         private EntityManagerInterface $entityManager
@@ -46,6 +48,13 @@ class ImagesProcessCommand extends Command
             null,
             InputOption::VALUE_NONE,
             'Apply to Images without a Photo'
+        );
+
+        $this->addOption(
+            'no-metadata',
+            null,
+            InputOption::VALUE_NONE,
+            'Skip metadata processing'
         );
 
         $this->addOption(
@@ -102,6 +111,10 @@ class ImagesProcessCommand extends Command
                 $image->getId(),
                 $image->getSrc()
             ));
+
+            if (!$input->getOption('no-metadata')) {
+                $image->setMetadata($this->imageMetadataService->generateImageMetadata($image));
+            }
 
             if (!$input->getOption('no-thumbnail')) {
                 $image->setThumb($this->imageManipulationService->generateImageThumb($image));
