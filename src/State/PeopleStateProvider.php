@@ -6,6 +6,7 @@ use ApiPlatform\Doctrine\Orm\State\CollectionProvider;
 use ApiPlatform\Doctrine\Orm\State\ItemProvider;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Operation;
+use ApiPlatform\State\Pagination\TraversablePaginator;
 use ApiPlatform\State\ProviderInterface;
 use App\Entity\Person;
 use App\Entity\User;
@@ -38,11 +39,17 @@ class PeopleStateProvider implements ProviderInterface
                 return $people;
             }
 
+            $safePeople = [];
             foreach ($people as $person) {
-                $person = $this->scopePortraits($user, $person);
+                $safePeople[] = $this->scopePortraits($user, $person);
             }
 
-            return $people;
+            return new TraversablePaginator(
+                new \ArrayIterator($safePeople),
+                $people->getCurrentPage(),
+                $people->getItemsPerPage(),
+                $people->getTotalItems()
+            );
         }
 
         $person = $this->itemProvider->provide($operation, $uriVariables, $context);
@@ -56,13 +63,19 @@ class PeopleStateProvider implements ProviderInterface
 
     private function scopePortraits(User $user, Person $person): Person
     {
+        $safePerson = new Person();
+        $safePerson->setId($person->getId());
+        $safePerson->setName($person->getName());
+
         $portraits = $person->getPortraits();
         foreach ($portraits as $portrait) {
             if (!$user->hasRoles($portrait->getImage()->getPhoto()->getRoles())) {
-                $person->removePortrait($portrait);
+                continue;
             }
+
+            $safePerson->addPortrait($portrait);
         }
 
-        return $person;
+        return $safePerson;
     }
 }
