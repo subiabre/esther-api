@@ -2,22 +2,26 @@
 
 namespace App\Security\Voter;
 
+use App\Entity\Photo;
 use App\Entity\User;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class ScopesVoter extends Voter
+class PhotoVoter extends Voter
 {
-    public const VIEW = 'SCOPE_VIEW';
-    public const EDIT = 'SCOPE_EDIT';
+    public const VIEW = 'PHOTO_VIEW';
+    public const EDIT = 'PHOTO_EDIT';
 
     protected function supports(string $attribute, mixed $subject): bool
     {
         return in_array($attribute, [self::VIEW, self::EDIT])
-            && method_exists($subject, 'getScopes');
+            && $subject instanceof Photo;
     }
 
+    /**
+     * @param Photo $subject
+     */
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
     {
         /** @var User|null */
@@ -31,12 +35,6 @@ class ScopesVoter extends Voter
             return true;
         }
 
-        foreach ($subject->getScopes() as $scope) {
-            if (\in_array($scope->getRole(), $user->getRoles())) {
-                return true;
-            }
-        }
-
-        return false;
+        return $user->hasRoles($subject->getRoles());
     }
 }

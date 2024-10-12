@@ -9,12 +9,11 @@ use ApiPlatform\Metadata\Operation;
 use App\Entity\Image;
 use App\Entity\Person;
 use App\Entity\Photo;
-use App\Entity\PhotoScope;
 use App\Entity\Portrait;
 use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Bundle\SecurityBundle\Security;
 
-class PhotoScopesExtension implements QueryCollectionExtensionInterface
+class PhotoRolesExtension implements QueryCollectionExtensionInterface
 {
     public function __construct(
         private Security $security
@@ -28,41 +27,28 @@ class PhotoScopesExtension implements QueryCollectionExtensionInterface
         array $context = []
     ): void {
         if (
-            !\in_array($resourceClass, [Photo::class, Portrait::class, Person::class,]) ||
-            // $this->security->isGranted('ROLE_ADMIN') ||
+            !\in_array($resourceClass, [Photo::class, Person::class]) ||
+            $this->security->isGranted('ROLE_ADMIN') ||
             null === $user = $this->security->getUser()
         ) {
             return;
         }
 
         $rootAlias = $queryBuilder->getRootAliases()[0];
-        $photoAlias = $rootAlias;
 
-        if ($resourceClass === Portrait::class) {
-            $imageAlias = \sprintf('%s_image', $rootAlias);
-            $queryBuilder->innerJoin(
-                Image::class,
-                $imageAlias,
-                Join::WITH,
-                \sprintf('%s.id = %s.image', $imageAlias, $rootAlias)
-            );
-
-            $photoAlias = \sprintf('%s_photo', $imageAlias);
-            $queryBuilder->innerJoin(
-                Photo::class,
-                $photoAlias,
-                Join::WITH,
-                \sprintf('%s.id = %s.photo', $photoAlias, $imageAlias)
-            );
+        if ($resourceClass === Photo::class) {
+            $photoAlias = $rootAlias;
         }
 
         if ($resourceClass === Person::class) {
-            $portraitAlias = \sprintf('%s_portrait', $rootAlias);
+            $personAlias = $rootAlias;
+
+            $portraitAlias = \sprintf('%s_portrait', $personAlias);
             $queryBuilder->innerJoin(
                 Portrait::class,
                 $portraitAlias,
                 Join::WITH,
-                \sprintf('%s.person = %s.id', $portraitAlias, $rootAlias)
+                \sprintf('%s.person = %s.id', $portraitAlias, $personAlias)
             );
 
             $imageAlias = \sprintf('%s_image', $portraitAlias);
@@ -82,15 +68,9 @@ class PhotoScopesExtension implements QueryCollectionExtensionInterface
             );
         }
 
-        $scopeAlias = \sprintf('%s_scope', $photoAlias);
-        $queryBuilder->innerJoin(
-            PhotoScope::class,
-            $scopeAlias,
-            Join::WITH,
-            \sprintf('%s.photo = %s.id', $scopeAlias, $photoAlias)
-        );
-
-        $queryBuilder->andWhere(\sprintf('%s.role IN (:user_roles)', $scopeAlias));
-        $queryBuilder->setParameter('user_roles', $user->getRoles());
+        foreach ($user->getRoles() as $key => $role) {
+            $queryBuilder->orWhere(\sprintf('JSON_CONTAINS(%s.roles, :user_role%d) = 1', $photoAlias, $key));
+            $queryBuilder->setParameter(\sprintf('user_role%d', $key), \json_encode($role));
+        }
     }
 }

@@ -8,7 +8,6 @@ use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\Entity\Person;
-use App\Entity\PhotoScope;
 use App\Entity\User;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -35,6 +34,10 @@ class PeopleStateProvider implements ProviderInterface
         if ($operation instanceof CollectionOperationInterface) {
             $people = $this->collectionProvider->provide($operation, $uriVariables, $context);
 
+            if ($this->security->isGranted('ROLE_ADMIN')) {
+                return $people;
+            }
+
             foreach ($people as $person) {
                 $person = $this->scopePortraits($user, $person);
             }
@@ -44,6 +47,10 @@ class PeopleStateProvider implements ProviderInterface
 
         $person = $this->itemProvider->provide($operation, $uriVariables, $context);
 
+        if ($this->security->isGranted('ROLE_ADMIN')) {
+            return $person;
+        }
+
         return $this->scopePortraits($user, $person);
     }
 
@@ -51,11 +58,7 @@ class PeopleStateProvider implements ProviderInterface
     {
         $portraits = $person->getPortraits();
         foreach ($portraits as $portrait) {
-            $roles = \array_map(function (PhotoScope $scope) {
-                return $scope->getRole();
-            }, $portrait->getImage()->getPhoto()->getScopes()->toArray());
-
-            if (!$user->hasRoles($roles)) {
+            if (!$user->hasRoles($portrait->getImage()->getPhoto()->getRoles())) {
                 $person->removePortrait($portrait);
             }
         }

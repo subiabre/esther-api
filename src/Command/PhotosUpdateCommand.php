@@ -4,9 +4,8 @@ namespace App\Command;
 
 use App\Entity\Photo;
 use App\Entity\PhotoDateRange;
-use App\Entity\PhotoScope;
+use App\Entity\User;
 use App\Repository\PhotoRepository;
-use App\Service\AuthenticationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -71,21 +70,18 @@ class PhotosUpdateCommand extends Command
 
                 $rolesToAdd = $input->getOption('add-role');
                 if ($rolesToAdd) {
-                    foreach ($this->parseRoles($rolesToAdd) as $role) {
-                        $scope = new PhotoScope();
-                        $scope->setRole($role);
-
-                        $photo->addScope($scope);
-                    }
+                    $photo->setRoles(\array_unique([
+                        ...$photo->getRoles(),
+                        ...User::parseRoles($rolesToAdd)
+                    ]));
                 }
 
                 $rolesToRemove = $input->getOption('remove-role');
                 if ($rolesToRemove) {
-                    foreach ($photo->getScopes() as $scope) {
-                        if (\in_array($scope->getRole(), $this->parseRoles($rolesToRemove))) {
-                            $photo->removeScope($scope);
-                        }
-                    }
+                    $photo->setRoles(\array_diff(
+                        $photo->getRoles(),
+                        User::parseRoles($rolesToRemove)
+                    ));
                 }
 
                 $this->entityManager->persist($photo);
@@ -143,10 +139,5 @@ class PhotosUpdateCommand extends Command
         }
 
         return new PhotoDateRange($dates[0], $dates[1]);
-    }
-
-    private function parseRoles(array $roles): array
-    {
-        return AuthenticationService::parseRoles($roles);
     }
 }

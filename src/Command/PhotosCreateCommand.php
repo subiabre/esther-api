@@ -5,7 +5,7 @@ namespace App\Command;
 use App\Entity\Image;
 use App\Entity\Photo;
 use App\Entity\PhotoDateRange;
-use App\Entity\PhotoScope;
+use App\Entity\User;
 use App\Service\ImageManipulationService;
 use App\Service\ImageMetadataService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -38,8 +38,8 @@ class PhotosCreateCommand extends Command
             ->addArgument('dateMin', InputArgument::REQUIRED)
             ->addArgument('dateMax', InputArgument::OPTIONAL, '', 'now')
             ->addOption('add-image', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY)
-            ->addOption('add-scope', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY)
-            ->addUsage('app:photos:create --add-image=\'http://example.com\' --add-scope=\'ROLE_ADMIN\' 2020-01-01');
+            ->addOption('add-role', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY)
+            ->addUsage('app:photos:create --add-image=\'http://example.com\' --add-role=\'ROLE_ADMIN\' 2020-01-01');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -62,11 +62,12 @@ class PhotosCreateCommand extends Command
             $photo->addImage($image);
         }
 
-        foreach ($input->getOption('add-scope') as $role) {
-            $scope = new PhotoScope();
-            $scope->setRole($role);
-
-            $photo->addScope($scope);
+        $rolesToAdd = $input->getOption('add-role');
+        if ($rolesToAdd) {
+            $photo->setRoles(\array_unique([
+                ...$photo->getRoles(),
+                ...User::parseRoles($rolesToAdd)
+            ]));
         }
 
         $this->entityManager->persist($photo);
@@ -79,9 +80,7 @@ class PhotosCreateCommand extends Command
             ['images', join(', ', array_map(function ($image) {
                 return $image->getSrc();
             }, $photo->getImages()->toArray()))],
-            ['scopes', join(', ', array_map(function ($scope) {
-                return $scope->getRole();
-            }, $photo->getScopes()->toArray()))]
+            ['roles', join(', ', $photo->getRoles())]
         ]);
 
         return Command::SUCCESS;

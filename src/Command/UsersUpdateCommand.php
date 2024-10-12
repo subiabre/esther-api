@@ -3,11 +3,11 @@
 namespace App\Command;
 
 use App\Console\ConsoleStyle;
+use App\Entity\User;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -60,12 +60,18 @@ class UsersUpdateCommand extends Command
 
         $rolesToAdd = $input->getOption('add-role');
         if ($rolesToAdd) {
-            $user->setRoles(array_unique([...$user->getRoles(), ...$rolesToAdd]));
+            $user->setRoles(array_unique([
+                ...$user->getRoles(),
+                ...User::parseRoles($rolesToAdd)
+            ]));
         }
 
         $rolesToRemove = $input->getOption('remove-role');
         if ($rolesToRemove) {
-            $user->setRoles(array_diff($user->getRoles(), $rolesToRemove));
+            $user->setRoles(array_diff(
+                $user->getRoles(),
+                User::parseRoles($rolesToRemove)
+            ));
         }
 
         $this->entityManager->persist($user);
