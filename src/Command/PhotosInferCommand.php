@@ -122,28 +122,12 @@ class PhotosInferCommand extends Command
             ));
 
             if ($input->getOption('date-filename')) {
-                \preg_match("/[0-9-]+/", $image->getSrcFilename(), $numbersInFilename);
+                $date = $this->parseDateInFilename($image->getSrcFilename());
+                $yearInFilename = $date->getMin()->format('Y');
+                $yearInFiledate = $image->getMetadata()->filedate->format('Y');
 
-                foreach ($numbersInFilename as $number) {
-                    try {
-                        $date = new \DateTime($number);
-                    } catch (\Exception $e) {
-                        continue;
-                    }
-
-                    if ($date > new \DateTime()) {
-                        continue;
-                    }
-
-                    if ($date->format('Y') === $image->getMetadata()->filedate->format('Y')) {
-                        continue;
-                    }
-
-                    $photo->setDate(new PhotoDateRange(
-                        clone $date->setDate($date->format('Y'), 1, 1)->setTime(0, 0, 0),
-                        clone $date->setDate($date->format('Y'), 12, 31)->setTime(0, 0, 0),
-                    ));
-                    break;
+                if ($yearInFilename !== $yearInFiledate) {
+                    $photo->setDate($date);
                 }
             }
 
@@ -203,5 +187,35 @@ class PhotosInferCommand extends Command
         $io->success(sprintf("Inferred %d Photos from %d Images", $inferredTotal, count($images)));
 
         return Command::SUCCESS;
+    }
+
+    private function parseDateInFilename(string $filename): ?PhotoDateRange
+    {
+        \preg_match("/[0-9-]+/", $filename, $numbersInFilename);
+
+        foreach ($numbersInFilename as $number) {
+            if (strlen($number) < 4) {
+                continue;
+            }
+
+            if (strlen($number) === 4) {
+                $number = \sprintf("%d-01-01", $number);
+            }
+
+            try {
+                $date = new \DateTime($number);
+            } catch (\Exception $e) {
+                continue;
+            }
+
+            if ($date > new \DateTime()) {
+                continue;
+            }
+
+            return new PhotoDateRange(
+                clone $date->setDate($date->format('Y'), 1, 1)->setTime(0, 0, 0),
+                clone $date->setDate($date->format('Y'), 12, 31)->setTime(0, 0, 0),
+            );
+        }
     }
 }
