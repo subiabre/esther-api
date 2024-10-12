@@ -148,10 +148,6 @@ class Photo
     {
         $roles = $this->roles;
 
-        if (empty($roles)) {
-            return ['ROLE_USER'];
-        }
-
         return $roles;
     }
 
