@@ -4,8 +4,8 @@ namespace App\Command;
 
 use App\Entity\Photo;
 use App\Entity\PhotoDateRange;
+use App\Entity\User;
 use App\Repository\PhotoRepository;
-use App\Service\AuthenticationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -72,7 +72,7 @@ class PhotosUpdateCommand extends Command
                 if ($rolesToAdd) {
                     $photo->setRoles(\array_unique([
                         ...$photo->getRoles(),
-                        ...$this->parseRoles($rolesToAdd)
+                        ...User::parseRoles($rolesToAdd)
                     ]));
                 }
 
@@ -80,7 +80,7 @@ class PhotosUpdateCommand extends Command
                 if ($rolesToRemove) {
                     $photo->setRoles(\array_diff(
                         $photo->getRoles(),
-                        $this->parseRoles($rolesToRemove)
+                        User::parseRoles($rolesToRemove)
                     ));
                 }
 
@@ -139,10 +139,5 @@ class PhotosUpdateCommand extends Command
         }
 
         return new PhotoDateRange($dates[0], $dates[1]);
-    }
-
-    private function parseRoles(array $roles): array
-    {
-        return AuthenticationService::parseRoles($roles);
     }
 }

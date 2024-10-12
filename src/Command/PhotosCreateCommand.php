@@ -5,7 +5,7 @@ namespace App\Command;
 use App\Entity\Image;
 use App\Entity\Photo;
 use App\Entity\PhotoDateRange;
-use App\Service\AuthenticationService;
+use App\Entity\User;
 use App\Service\ImageManipulationService;
 use App\Service\ImageMetadataService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -66,7 +66,7 @@ class PhotosCreateCommand extends Command
         if ($rolesToAdd) {
             $photo->setRoles(\array_unique([
                 ...$photo->getRoles(),
-                ...AuthenticationService::parseRoles($rolesToAdd)
+                ...User::parseRoles($rolesToAdd)
             ]));
         }
 
