@@ -33,6 +33,20 @@ class PhotosInferCommand extends Command
     protected function configure(): void
     {
         $this->addOption(
+            'update',
+            null,
+            InputOption::VALUE_NONE,
+            'Update the already present Photos with inferred data, will override data'
+        );
+
+        $this->addOption(
+            'dangling',
+            null,
+            InputOption::VALUE_NONE,
+            'Infer Photos from Images without a Photo'
+        );
+
+        $this->addOption(
             'match-by',
             null,
             InputOption::VALUE_OPTIONAL,
@@ -54,20 +68,6 @@ class PhotosInferCommand extends Command
             InputOption::VALUE_OPTIONAL,
             'A RegEx pattern to use for matching',
             '[A-B]$'
-        );
-
-        $this->addOption(
-            'update',
-            null,
-            InputOption::VALUE_NONE,
-            'Update the already present Photos with inferred data, will override data'
-        );
-
-        $this->addOption(
-            'dangling',
-            null,
-            InputOption::VALUE_NONE,
-            'Infer Photos from Images without a Photo'
         );
     }
 
