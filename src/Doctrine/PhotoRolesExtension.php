@@ -6,7 +6,11 @@ use ApiPlatform\Doctrine\Orm\Extension\QueryCollectionExtensionInterface;
 use Doctrine\ORM\QueryBuilder;
 use ApiPlatform\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use ApiPlatform\Metadata\Operation;
+use App\Entity\Image;
+use App\Entity\Person;
 use App\Entity\Photo;
+use App\Entity\Portrait;
+use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Bundle\SecurityBundle\Security;
 
 class PhotoRolesExtension implements QueryCollectionExtensionInterface
@@ -23,7 +27,7 @@ class PhotoRolesExtension implements QueryCollectionExtensionInterface
         array $context = []
     ): void {
         if (
-            !\in_array($resourceClass, [Photo::class]) ||
+            !\in_array($resourceClass, [Photo::class, Person::class]) ||
             $this->security->isGranted('ROLE_ADMIN') ||
             null === $user = $this->security->getUser()
         ) {
@@ -31,7 +35,38 @@ class PhotoRolesExtension implements QueryCollectionExtensionInterface
         }
 
         $rootAlias = $queryBuilder->getRootAliases()[0];
-        $photoAlias = $rootAlias;
+
+        if ($resourceClass === Photo::class) {
+            $photoAlias = $rootAlias;
+        }
+
+        if ($resourceClass === Person::class) {
+            $personAlias = $rootAlias;
+
+            $portraitAlias = \sprintf('%s_portrait', $personAlias);
+            $queryBuilder->innerJoin(
+                Portrait::class,
+                $portraitAlias,
+                Join::WITH,
+                \sprintf('%s.person = %s.id', $portraitAlias, $personAlias)
+            );
+
+            $imageAlias = \sprintf('%s_image', $portraitAlias);
+            $queryBuilder->innerJoin(
+                Image::class,
+                $imageAlias,
+                Join::WITH,
+                \sprintf('%s.id = %s.image', $imageAlias, $portraitAlias)
+            );
+
+            $photoAlias = \sprintf('%s_photo', $imageAlias);
+            $queryBuilder->innerJoin(
+                Photo::class,
+                $photoAlias,
+                Join::WITH,
+                \sprintf('%s.id = %s.photo', $photoAlias, $imageAlias)
+            );
+        }
 
         foreach ($user->getRoles() as $key => $role) {
             $queryBuilder->orWhere(\sprintf('JSON_CONTAINS(%s.roles, :user_role%d) = 1', $photoAlias, $key));
