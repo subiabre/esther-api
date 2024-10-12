@@ -116,7 +116,7 @@ class PhotosUpdateCommand extends Command
             $photos = $this->photoRepository->findByRange($ids[0], $ids[1]);
         }
 
-        if (\preg_match('/^\d+,\d+$/', $id)) {
+        if (\preg_match('/^[0-9]+(?:,[0-9]+)*$/', $id)) {
             $ids = \explode(',', $id);
 
             $photos = $this->photoRepository->findBy(['id' => $ids]);
