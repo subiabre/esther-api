@@ -4,7 +4,6 @@ namespace App\Command;
 
 use App\Entity\Photo;
 use App\Entity\PhotoDateRange;
-use App\Entity\PhotoScope;
 use App\Repository\PhotoRepository;
 use App\Service\AuthenticationService;
 use Doctrine\ORM\EntityManagerInterface;

@@ -22,7 +22,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 #[API\GetCollection(security: "is_granted('ROLE_USER')")]
 #[API\Post(security: "is_granted('ROLE_USER')")]
-#[API\Get(security: "is_granted('SCOPE_VIEW', object)")]
+#[API\Get(security: "is_granted('PHOTO_VIEW', object)")]
 #[API\Put(security: "is_granted('ROLE_USER')")]
 #[API\Delete(security: "is_granted('ROLE_USER')")]
 #[API\Patch(security: "is_granted('ROLE_USER')")]
