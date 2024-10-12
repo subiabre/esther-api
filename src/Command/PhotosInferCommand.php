@@ -33,11 +33,27 @@ class PhotosInferCommand extends Command
     protected function configure(): void
     {
         $this->addOption(
-            'match-min',
+            'match-by',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'Define the strategy by which to decide images photo matching',
+            'fuzzy'
+        );
+
+        $this->addOption(
+            'fuzzy-min',
             null,
             InputOption::VALUE_OPTIONAL,
             'A threshold of 0.0 requires a perfect match (of both letters and location), a threshold of 1.0 would match anything',
             0.2
+        );
+
+        $this->addOption(
+            'regex-pattern',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'A RegEx pattern to use for matching',
+            '[A-B]$'
         );
 
         $this->addOption(
@@ -98,11 +114,22 @@ class PhotosInferCommand extends Command
                 $image->getMetadata()->filedate
             ));
 
-            $imageMatches = $this->photoInferenceService->matchPhotoImages(
-                $photo,
-                $imagesNotInferred,
-                $input->getOption('match-min')
-            );
+            switch ($input->getOption('match-by')) {
+                case 'fuzzy':
+                    $imageMatches = $this->photoInferenceService->matchPhotoImagesByFuzzy(
+                        $photo,
+                        $imagesNotInferred,
+                        $input->getOption('fuzzy-min')
+                    );
+                    break;
+                case 'regex':
+                    $imageMatches = $this->photoInferenceService->matchPhotoImagesByRegex(
+                        $photo,
+                        $imagesNotInferred,
+                        $input->getOption('regex-pattern')
+                    );
+                    break;
+            }
 
             if (count($imageMatches) > 0) {
                 $io->writeln("Found possible Image relationships via filename.");

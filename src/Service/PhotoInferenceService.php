@@ -13,7 +13,7 @@ class PhotoInferenceService
      * @param Image[] $images
      * @return array
      */
-    public function matchPhotoImages(
+    public function matchPhotoImagesByFuzzy(
         Photo $photo,
         array $images,
         float $threshold = 0.2
@@ -49,5 +49,44 @@ class PhotoInferenceService
         return \array_map(function ($match) {
             return new PhotoInferenceImageMatch($match);
         }, $fuse->search($needle->getSrcFilename()));
+    }
+
+    public function matchPhotoImagesByRegex(
+        Photo $photo,
+        array $images,
+        string $pattern
+    ): array {
+        $needle = $photo->getImages()[0];
+
+        \preg_match("/$pattern/", $needle->getSrcFilename(), $patternMatches);
+        if (empty($patternMatches)) {
+            return [];
+        }
+
+        $key = \preg_replace("/$patternMatches[0]/", "", $needle->getSrcFilename());
+
+        $choices = [];
+        foreach ($images as $image) {
+            if ($image->getId() === $needle->getId()) {
+                continue;
+            }
+
+            $filename = $image->getSrcFilename();
+
+            if (!\preg_match("/$key$pattern/", $filename)) {
+                continue;
+            }
+
+            $choices[$filename] = [
+                'score' => \strlen(\str_replace($key, "", $filename)),
+                'item' => ['image' => $image]
+            ];
+        }
+
+        \ksort($choices);
+
+        return \array_map(function ($match) {
+            return new PhotoInferenceImageMatch($match);
+        }, \array_values($choices));
     }
 }
