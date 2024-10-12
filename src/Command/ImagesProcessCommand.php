@@ -51,6 +51,13 @@ class ImagesProcessCommand extends Command
         );
 
         $this->addOption(
+            'alt-filename',
+            null,
+            InputOption::VALUE_NONE,
+            'Use the Image filename as alt text'
+        );
+
+        $this->addOption(
             'no-metadata',
             null,
             InputOption::VALUE_NONE,
@@ -69,13 +76,6 @@ class ImagesProcessCommand extends Command
             null,
             InputOption::VALUE_NONE,
             'Skip portraits generation process'
-        );
-
-        $this->addOption(
-            'filename-alt',
-            null,
-            InputOption::VALUE_NONE,
-            'Use the Image filename as alt text'
         );
     }
 
@@ -111,6 +111,10 @@ class ImagesProcessCommand extends Command
                 $image->getId(),
                 $image->getSrc()
             ));
+
+            if ($input->getOption('alt-filename')) {
+                $image->setAlt($image->getSrcFilename());
+            }
 
             if (!$input->getOption('no-metadata')) {
                 $image->setMetadata($this->imageMetadataService->generateImageMetadata($image));
@@ -148,10 +152,6 @@ class ImagesProcessCommand extends Command
                 $io->progressAdvance();
             }
             $io->progressFinish();
-
-            if ($input->getOption('filename-alt')) {
-                $image->setAlt($image->getSrcFilename());
-            }
 
             $this->entityManager->persist($image);
         }
