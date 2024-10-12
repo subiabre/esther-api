@@ -56,18 +56,6 @@ class Photo
     #[ORM\Embedded(class: PhotoAddress::class)]
     private ?PhotoAddress $address = null;
 
-    /**
-     * Scopes hold the relationship between an User's role and their access to a Photo.
-     */
-    #[API\ApiProperty(security: "is_granted('ROLE_ADMIN')")]
-    #[ORM\OneToMany(
-        targetEntity: PhotoScope::class,
-        mappedBy: 'photo',
-        cascade: ['persist'],
-        orphanRemoval: true
-    )]
-    private Collection $scopes;
-
     #[Assert\NotBlank()]
     #[Assert\Count(min: 1)]
     #[API\ApiFilter(
@@ -81,9 +69,12 @@ class Photo
     )]
     private Collection $images;
 
+    #[API\ApiProperty(security: 'is_granted("ROLE_ADMIN")')]
+    #[ORM\Column]
+    private array $roles = [];
+
     public function __construct()
     {
-        $this->scopes = new ArrayCollection();
         $this->images = new ArrayCollection();
     }
 
@@ -114,46 +105,6 @@ class Photo
         $this->address = $address;
 
         return $this;
-    }
-
-    /**
-     * @return Collection<int, PhotoScope>
-     */
-    public function getScopes(): Collection
-    {
-        return $this->scopes;
-    }
-
-    public function addScope(PhotoScope $scope): static
-    {
-        if (
-            !$this->scopes->contains($scope) &&
-            !$this->hasScopeWithRole($scope->getRole())
-        ) {
-            $this->scopes->add($scope);
-            $scope->setPhoto($this);
-        }
-
-        return $this;
-    }
-
-    public function removeScope(PhotoScope $scope): static
-    {
-        if ($this->scopes->removeElement($scope)) {
-            // set the owning side to null (unless already changed)
-            if ($scope->getPhoto() === $this) {
-                $scope->setPhoto(null);
-            }
-        }
-
-        return $this;
-    }
-
-    public function hasScopeWithRole(string $role): bool
-    {
-        return \in_array($role, \array_map(function (PhotoScope $scope) {
-            return $scope->getRole();
-        }, $this->scopes->toArray()));
     }
 
     /**
@@ -189,6 +140,24 @@ class Photo
                 $image->setPhoto(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+
+        if (empty($roles)) {
+            return ['ROLE_USER'];
+        }
+
+        return $roles;
+    }
+
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
 
         return $this;
     }
