@@ -5,7 +5,6 @@ namespace App\Command;
 use App\Entity\Image;
 use App\Repository\ImageRepository;
 use App\Service\ImageManipulationService;
-use App\Service\ImageMetadataService;
 use App\Service\RoutesService;
 use App\Storage\StorageLocator;
 use App\Validator\ImageFileValidator;
@@ -27,7 +26,6 @@ class ImagesImportCommand extends Command
     public function __construct(
         private StorageLocator $storageLocator,
         private ImageRepository $imageRepository,
-        private ImageMetadataService $imageMetadataService,
         private ImageManipulationService $imageManipulationService,
         private EntityManagerInterface $entityManager
     ) {
@@ -54,13 +52,6 @@ class ImagesImportCommand extends Command
             null,
             InputOption::VALUE_NONE,
             'Update the already present Images from the storage, will override data'
-        );
-
-        $this->addOption(
-            'filename-alt',
-            null,
-            InputOption::VALUE_NONE,
-            'Use the Image filename as alt text'
         );
     }
 
@@ -89,12 +80,6 @@ class ImagesImportCommand extends Command
             if (!$imageExists) {
                 $image = new Image;
                 $image->setSrc($src);
-            }
-
-            $image->setMetadata($this->imageMetadataService->generateImageMetadata($image));
-
-            if ($input->getOption('filename-alt')) {
-                $image->setAlt($image->getSrcFilename());
             }
 
             $this->entityManager->persist($image);
