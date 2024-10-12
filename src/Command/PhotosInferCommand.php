@@ -47,10 +47,10 @@ class PhotosInferCommand extends Command
         );
 
         $this->addOption(
-            'match-by',
-            null,
+            'image-match-by',
+            'M',
             InputOption::VALUE_OPTIONAL,
-            'Define the strategy by which to decide images photo matching',
+            'Define the strategy (fuzzy|regex) by which to decide images photo matching',
             'fuzzy'
         );
 
@@ -66,7 +66,7 @@ class PhotosInferCommand extends Command
             'regex-pattern',
             null,
             InputOption::VALUE_OPTIONAL,
-            'A RegEx pattern to use for matching',
+            'Pattern will be removed from image filename and regex matching will be performed on base filename + pattern',
             '[A-B]$'
         );
     }
@@ -114,7 +114,7 @@ class PhotosInferCommand extends Command
                 $image->getMetadata()->filedate
             ));
 
-            switch ($input->getOption('match-by')) {
+            switch ($input->getOption('image-match-by')) {
                 case 'fuzzy':
                     $imageMatches = $this->photoInferenceService->matchPhotoImagesByFuzzy(
                         $photo,
