@@ -47,10 +47,17 @@ class PhotosInferCommand extends Command
         );
 
         $this->addOption(
+            'date-filename',
+            null,
+            InputOption::VALUE_NONE,
+            'Extract photo date ranges from image filenames'
+        );
+
+        $this->addOption(
             'image-match-by',
             'M',
             InputOption::VALUE_OPTIONAL,
-            'Define the strategy (fuzzy|regex) by which to decide images photo matching',
+            'Define the strategy (fuzzy|regex|none) by which to decide images photo matching',
             'fuzzy'
         );
 
@@ -114,7 +121,36 @@ class PhotosInferCommand extends Command
                 $image->getMetadata()->filedate
             ));
 
+            if ($input->getOption('date-filename')) {
+                \preg_match("/[0-9-]+/", $image->getSrcFilename(), $numbersInFilename);
+
+                foreach ($numbersInFilename as $number) {
+                    try {
+                        $date = new \DateTime($number);
+                    } catch (\Exception $e) {
+                        continue;
+                    }
+
+                    if ($date > new \DateTime()) {
+                        continue;
+                    }
+
+                    if ($date->format('Y') === $image->getMetadata()->filedate->format('Y')) {
+                        continue;
+                    }
+
+                    $photo->setDate(new PhotoDateRange(
+                        clone $date->setDate($date->format('Y'), 1, 1)->setTime(0, 0, 0),
+                        clone $date->setDate($date->format('Y'), 12, 31)->setTime(0, 0, 0),
+                    ));
+                    break;
+                }
+            }
+
             switch ($input->getOption('image-match-by')) {
+                case 'none':
+                    $imageMatches = [];
+                    break;
                 case 'fuzzy':
                     $imageMatches = $this->photoInferenceService->matchPhotoImagesByFuzzy(
                         $photo,
