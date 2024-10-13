@@ -21,11 +21,10 @@ class ImageMetadata
         #[ORM\Column(type: Types::INTEGER)]
         public int $filesize,
 
-        #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
-        public ?\DateTimeImmutable $filedate,
+        #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+        public \DateTimeImmutable $filedate,
 
-        #[ORM\Column(type: Types::JSON)]
-        public array $exif,
-    ) {
-    }
+        #[ORM\Column(type: Types::JSON, nullable: true)]
+        public array $exif = [],
+    ) {}
 }

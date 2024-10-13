@@ -7,13 +7,12 @@ use App\Entity\ImageMetadata;
 
 class ImageMetadataService
 {
-    public function generateImageMetadata(Image $image): ImageMetadata
+    public function getImageMetadata(Image $image): ImageMetadata
     {
         $src = $image->getSrc();
 
         $imginfo = \getimagesize($src);
         $headers = $this->getHeaders($src);
-        $exif = $this->getExif($src);
 
         $filesize = $imginfo[0] * $imginfo[1] * $imginfo["bits"];
 
@@ -30,17 +29,12 @@ class ImageMetadataService
             );
         }
 
-        if ($exifdate = $this->getExifData($exif, 'EXIF', 'DateTimeOriginal')) {
-            $filedate = new \DateTimeImmutable($exifdate);
-        }
-
         return new ImageMetadata(
             $imginfo[0],
             $imginfo[1],
             $imginfo['mime'],
             $filesize,
-            $filedate,
-            $exif,
+            $filedate
         );
     }
 
@@ -54,9 +48,9 @@ class ImageMetadataService
         return $headers;
     }
 
-    private function getExif(string $src): array
+    public function getExif(Image $image): array
     {
-        $exif = @\exif_read_data($src, null, true) ?: [];
+        $exif = @\exif_read_data($image->getSrc(), null, true) ?: [];
 
         return $this->cleanExif($exif);
     }
@@ -80,7 +74,7 @@ class ImageMetadataService
         return $data;
     }
 
-    private function getExifData(array $exif, string ...$keys)
+    public function getExifKey(array $exif, string ...$keys)
     {
         $data = $exif;
         foreach ($keys as $key) {

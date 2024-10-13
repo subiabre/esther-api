@@ -117,7 +117,16 @@ class ImagesProcessCommand extends Command
             }
 
             if (!$input->getOption('no-metadata')) {
-                $image->setMetadata($this->imageMetadataService->generateImageMetadata($image));
+                $exif = $this->imageMetadataService->getExif($image);
+
+                $metadata = $image->getMetadata();
+                $metadata->exif = $exif;
+
+                if ($exifdate = $this->imageMetadataService->getExifKey($exif, 'EXIF', 'DateTimeOriginal')) {
+                    $metadata->filedate = new \DateTimeImmutable($exifdate);
+                }
+
+                $image->setMetadata($metadata);
             }
 
             if (!$input->getOption('no-thumbnail')) {

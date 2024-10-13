@@ -4,7 +4,7 @@ namespace App\Command;
 
 use App\Entity\Image;
 use App\Repository\ImageRepository;
-use App\Service\ImageManipulationService;
+use App\Service\ImageMetadataService;
 use App\Service\RoutesService;
 use App\Storage\StorageLocator;
 use App\Validator\ImageFileValidator;
@@ -26,7 +26,7 @@ class ImagesImportCommand extends Command
     public function __construct(
         private StorageLocator $storageLocator,
         private ImageRepository $imageRepository,
-        private ImageManipulationService $imageManipulationService,
+        private ImageMetadataService $imageMetadataService,
         private EntityManagerInterface $entityManager
     ) {
         parent::__construct();
@@ -81,6 +81,8 @@ class ImagesImportCommand extends Command
                 $image = new Image;
                 $image->setSrc($src);
             }
+
+            $image->setMetadata($this->imageMetadataService->getImageMetadata($image));
 
             $this->entityManager->persist($image);
             $importedTotal++;
