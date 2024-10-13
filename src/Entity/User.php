@@ -8,6 +8,7 @@ use App\Entity\Trait\TimestampableCreation;
 use App\Entity\Trait\TimestampableUpdation;
 use App\Repository\UserRepository;
 use App\State\UserPasswordProcessor;
+use App\State\UserStateProvider;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -21,6 +22,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * Someone who interacts with the API.
  */
 #[UniqueEntity(fields: ['email'])]
+#[API\ApiResource(provider: UserStateProvider::class)]
 #[API\GetCollection(security: "is_granted('ROLE_USER')")]
 #[API\Post(
     security: "is_granted('PUBLIC_ACCESS')",
@@ -85,6 +87,9 @@ class User implements UserInterface, UserOwnedInterface, PasswordAuthenticatedUs
     #[API\ApiProperty(writable: false, security: "is_granted('USER_EDIT', object)")]
     #[ORM\OneToMany(targetEntity: Session::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $sessions;
+
+    #[API\ApiProperty(writable: false)]
+    private ?array $logEntries = null;
 
     public function __construct()
     {
@@ -230,6 +235,21 @@ class User implements UserInterface, UserOwnedInterface, PasswordAuthenticatedUs
                 $session->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return \Gedmo\Loggable\Entity\LogEntry[]
+     */
+    public function getLogEntries(): ?array
+    {
+        return $this->logEntries;
+    }
+
+    public function setLogEntries(?array $logEntries): static
+    {
+        $this->logEntries = $logEntries;
 
         return $this;
     }
