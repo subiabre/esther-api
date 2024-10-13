@@ -14,6 +14,7 @@ use App\Repository\PhotoRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -27,6 +28,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[API\Delete(security: "is_granted('ROLE_USER')")]
 #[API\Patch(security: "is_granted('ROLE_USER')")]
 #[ORM\Entity(repositoryClass: PhotoRepository::class)]
+#[Gedmo\Loggable()]
 class Photo
 {
     use TimestampableCreation;
@@ -45,6 +47,7 @@ class Photo
     #[API\ApiFilter(PhotoDateOrderFilter::class)]
     #[API\ApiFilter(PhotoDateRangeFilter::class)]
     #[ORM\Embedded(class: PhotoDateRange::class)]
+    #[Gedmo\Versioned()]
     private ?PhotoDateRange $date = null;
 
     /**
@@ -54,6 +57,7 @@ class Photo
     #[API\ApiFilter(PhotoAddressKnownFilter::class)]
     #[API\ApiFilter(PhotoAddressComponentsFilter::class)]
     #[ORM\Embedded(class: PhotoAddress::class)]
+    #[Gedmo\Versioned()]
     private ?PhotoAddress $address = null;
 
     #[Assert\NotBlank()]
@@ -71,6 +75,7 @@ class Photo
 
     #[API\ApiProperty(security: 'is_granted("ROLE_ADMIN")')]
     #[ORM\Column]
+    #[Gedmo\Versioned()]
     private array $roles = [];
 
     public function __construct()

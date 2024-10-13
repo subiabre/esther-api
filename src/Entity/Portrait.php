@@ -7,6 +7,7 @@ use App\Repository\PortraitRepository;
 use App\State\PortraitStateProcessor;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 #[API\GetCollection()]
 #[API\Post(processor: PortraitStateProcessor::class)]
@@ -15,6 +16,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[API\Delete()]
 #[API\Patch()]
 #[ORM\Entity(repositoryClass: PortraitRepository::class)]
+#[Gedmo\Loggable()]
 class Portrait
 {
     #[ORM\Id]
@@ -43,6 +45,7 @@ class Portrait
     private ?Image $image = null;
 
     #[ORM\ManyToOne(inversedBy: 'portraits')]
+    #[Gedmo\Versioned()]
     private ?Person $person = null;
 
     public function getId(): ?int

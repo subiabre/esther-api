@@ -13,6 +13,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -27,6 +28,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[API\Delete(security: "is_granted('ROLE_USER')")]
 #[API\Patch(security: "is_granted('ROLE_USER')")]
 #[ORM\Entity(repositoryClass: ImageRepository::class)]
+#[Gedmo\Loggable()]
 class Image
 {
     use TimestampableCreation;
@@ -51,6 +53,7 @@ class Image
      * also used as the alternative text for the (non) displayed image.
      */
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Gedmo\Versioned()]
     private ?string $alt = null;
 
     /**
