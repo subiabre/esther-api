@@ -4,20 +4,24 @@ namespace App\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Embeddable]
+#[Gedmo\Loggable()]
 class PhotoDateRange
 {
     #[Assert\NotBlank()]
     #[Assert\Type('datetime')]
     #[Assert\LessThanOrEqual('now')]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Gedmo\Versioned()]
     private ?\DateTimeInterface $min = null;
 
     #[Assert\Type('datetime')]
     #[Assert\LessThanOrEqual('now')]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Gedmo\Versioned()]
     private ?\DateTimeInterface $max = null;
 
     public function __construct(
