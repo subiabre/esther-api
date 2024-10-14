@@ -31,22 +31,25 @@ final class PhotoAddressComponentsFilter extends AbstractFilter
             return;
         }
 
-        $strategy = 'and';
         $values = $values[self::FILTER_NAME];
 
-        if (count($values) > 1) {
-            $strategy = 'or';
+        $conditions = $queryBuilder->expr()->orX();
+        foreach ($values as $key => $value) {
+            list($where, $parameter) = $this->getWhereCondition($value, $property, $queryBuilder, $queryNameGenerator);
+
+            $conditions->add($where);
+            $queryBuilder->setParameter(
+                $parameter['name'],
+                $parameter['value']
+            );
         }
 
-        foreach ($values as $key => $value) {
-            $this->addWhere($value, $property, $strategy, $queryBuilder, $queryNameGenerator);
-        }
+        $queryBuilder->andWhere($conditions);
     }
 
-    public function addWhere(
+    public function getWhereCondition(
         string $value,
         string $property,
-        string $strategy,
         QueryBuilder $queryBuilder,
         QueryNameGeneratorInterface $queryNameGenerator,
     ) {
@@ -71,18 +74,13 @@ final class PhotoAddressComponentsFilter extends AbstractFilter
             $parameterName,
         );
 
-        switch ($strategy) {
-            case 'or':
-                $queryBuilder
-                    ->orWhere($where)
-                    ->setParameter($parameterName, json_encode($address));
-                break;
-            case 'and':
-                $queryBuilder
-                    ->andWhere($where)
-                    ->setParameter($parameterName, json_encode($address));
-                break;
-        }
+        return [
+            $where,
+            [
+                'name' => $parameterName,
+                'value' => \json_encode($address)
+            ]
+        ];
     }
 
     public function getDescription(string $resourceClass): array
