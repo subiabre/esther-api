@@ -47,7 +47,7 @@ final class PhotoAddressComponentsFilter extends AbstractFilter
         $queryBuilder->andWhere($conditions);
     }
 
-    public function getWhereCondition(
+    private function getWhereCondition(
         string $value,
         string $property,
         QueryBuilder $queryBuilder,

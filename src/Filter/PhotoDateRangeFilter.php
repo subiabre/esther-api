@@ -10,8 +10,8 @@ use Symfony\Component\PropertyInfo\Type;
 
 final class PhotoDateRangeFilter extends AbstractFilter
 {
-    public const PARAMETER_MIN = 'range:min';
-    public const PARAMETER_MAX = 'range:max';
+    public const PARAMETER_MIN = 'range.min';
+    public const PARAMETER_MAX = 'range.max';
 
     protected function filterProperty(
         string $property,
@@ -42,7 +42,7 @@ final class PhotoDateRangeFilter extends AbstractFilter
         }
     }
 
-    public function addWhere(
+    private function addWhere(
         string $property,
         string $operator,
         string $value,
