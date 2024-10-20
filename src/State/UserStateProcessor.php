@@ -8,7 +8,7 @@ use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-class UserPasswordProcessor implements ProcessorInterface
+class UserStateProcessor implements ProcessorInterface
 {
     public function __construct(
         private UserPasswordHasherInterface $userPasswordHasher,

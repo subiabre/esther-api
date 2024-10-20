@@ -7,7 +7,7 @@ use App\Entity\Interface\UserOwnedInterface;
 use App\Entity\Trait\TimestampableCreation;
 use App\Entity\Trait\TimestampableUpdation;
 use App\Repository\UserRepository;
-use App\State\UserPasswordProcessor;
+use App\State\UserStateProcessor;
 use App\State\UserStateProvider;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -26,18 +26,18 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[API\GetCollection(security: "is_granted('ROLE_USER')")]
 #[API\Post(
     security: "is_granted('PUBLIC_ACCESS')",
-    processor: UserPasswordProcessor::class,
+    processor: UserStateProcessor::class,
     validationContext: ['groups' => ['Default', 'postValidation']]
 )]
 #[API\Get(security: "is_granted('ROLE_USER')")]
 #[API\Put(
     security: "is_granted('USER_EDIT', object)",
-    processor: UserPasswordProcessor::class
+    processor: UserStateProcessor::class
 )]
 #[API\Delete(security: "is_granted('USER_EDIT', object)")]
 #[API\Patch(
     security: "is_granted('USER_EDIT', object)",
-    processor: UserPasswordProcessor::class
+    processor: UserStateProcessor::class
 )]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements UserInterface, UserOwnedInterface, PasswordAuthenticatedUserInterface
