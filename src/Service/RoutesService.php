@@ -31,17 +31,4 @@ class RoutesService
 
         return $path;
     }
-
-    public static function normalizeUrl(string $url): string
-    {
-        $data = parse_url($url);
-
-        // Remove file basename from path part
-        $path = str_replace(basename($data['path']), '', $data['path']);
-
-        // Normalized url encoded file basename
-        $file = urlencode(urldecode(basename($data['path'])));
-
-        return sprintf("%s://%s%s%s", $data['scheme'], $data['host'], $path, $file);
-    }
 }

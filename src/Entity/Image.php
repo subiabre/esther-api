@@ -98,7 +98,7 @@ class Image
 
     public function setSrc(string $src): static
     {
-        $this->src = RoutesService::normalizeUrl($src);
+        $this->src = $src;
 
         return $this;
     }
