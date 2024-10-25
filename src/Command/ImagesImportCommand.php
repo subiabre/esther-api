@@ -6,6 +6,7 @@ use App\Entity\Image;
 use App\Repository\ImageRepository;
 use App\Service\ImageMetadataService;
 use App\Service\RoutesService;
+use App\Storage\LocalDriver;
 use App\Storage\StorageLocator;
 use App\Validator\ImageFileValidator;
 use Doctrine\ORM\EntityManagerInterface;
@@ -24,6 +25,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class ImagesImportCommand extends Command
 {
     public function __construct(
+        private RoutesService $routesService,
         private StorageLocator $storageLocator,
         private ImageRepository $imageRepository,
         private ImageMetadataService $imageMetadataService,
@@ -59,14 +61,26 @@ class ImagesImportCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $storage = $this->storageLocator->getFilesystem($input->getArgument('storage'));
-        $listing = $storage->listContents($input->getArgument('location'));
+        $driver = $input->getArgument('storage');
+        $location = $input->getArgument('location');
+
+        $storage = $this->storageLocator->getFilesystem($driver);
+        $listing = $storage->listContents($location);
 
         $importedTotal = 0;
         foreach ($listing as $item) {
-            $src = RoutesService::normalizeUrl($storage->publicUrl($item->path()));
+            $src = $storage->publicUrl($item->path());
 
-            if (!ImageFileValidator::isImage($src)) {
+            $path = $src;
+            if ($driver === LocalDriver::getName()) {
+                $path = $this->routesService->buildAbsolutePath(
+                    LocalDriver::PUBLIC_DIR,
+                    LocalDriver::STORAGE_DIR,
+                    $item->path()
+                );
+            }
+
+            if (!ImageFileValidator::isImage($path)) {
                 continue;
             }
 
@@ -82,7 +96,7 @@ class ImagesImportCommand extends Command
                 $image->setSrc($src);
             }
 
-            $image->setMetadata($this->imageMetadataService->getImageMetadata($image));
+            $image->setMetadata($this->imageMetadataService->getImageMetadata($path));
 
             $this->entityManager->persist($image);
             $importedTotal++;
@@ -96,7 +110,11 @@ class ImagesImportCommand extends Command
 
         $this->entityManager->flush();
 
-        $io->success(sprintf("Imported %d images from %s", $importedTotal, rtrim($storage->publicUrl('0'), '0')));
+        $io->success(sprintf(
+            "Imported %d images from %s",
+            $importedTotal,
+            $storage->publicUrl($location)
+        ));
 
         return Command::SUCCESS;
     }
