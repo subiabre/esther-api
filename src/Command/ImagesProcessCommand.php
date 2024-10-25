@@ -6,6 +6,8 @@ use App\Repository\ImageRepository;
 use App\Service\ImageManipulationService;
 use App\Service\ImageMetadataService;
 use App\Service\ImageVisionService;
+use App\Service\RoutesService;
+use App\Storage\LocalDriver;
 use App\Storage\StorageLocator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -24,6 +26,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class ImagesProcessCommand extends Command
 {
     public function __construct(
+        private LocalDriver $localDriver,
+        private RoutesService $routesService,
         private StorageLocator $storageLocator,
         private ImageRepository $imageRepository,
         private ImageMetadataService $imageMetadataService,
@@ -116,13 +120,18 @@ class ImagesProcessCommand extends Command
                 $image->setAlt($image->getSrcFilename());
             }
 
+            $path = $image->getSrc();
+            if ($this->localDriver->isLocalPath($path)) {
+                $path = $this->localDriver->getAbsolutePath($path);
+            }
+
             if (!$input->getOption('no-metadata')) {
-                $exif = $this->imageMetadataService->getExif($image);
+                $exif = $this->imageMetadataService->getExif($path);
 
                 $metadata = $image->getMetadata();
                 $metadata->exif = $exif;
 
-                if ($exifdate = $this->imageMetadataService->getExifKey($exif, 'EXIF', 'DateTimeOriginal')) {
+                if ($exifdate = $this->imageMetadataService->getKey($exif, 'EXIF', 'DateTimeOriginal')) {
                     $metadata->filedate = new \DateTimeImmutable($exifdate);
                 }
 
@@ -130,7 +139,7 @@ class ImagesProcessCommand extends Command
             }
 
             if (!$input->getOption('no-thumbnail')) {
-                $image->setThumb($this->imageManipulationService->generateImageThumb($image));
+                $image->setThumb($this->imageManipulationService->generateImageThumb($path));
             }
 
             if ($input->getOption('no-portraits')) {
@@ -149,7 +158,7 @@ class ImagesProcessCommand extends Command
             $io->progressStart($portraitsCount);
             foreach ($portraits as $portrait) {
                 $portrait->setSrc($this->imageManipulationService->crop(
-                    $image,
+                    $path,
                     $portrait->getWidth(),
                     $portrait->getHeight(),
                     $portrait->getOffsetX(),
