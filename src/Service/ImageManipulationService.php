@@ -2,7 +2,6 @@
 
 namespace App\Service;
 
-use App\Entity\Image;
 use App\Entity\ImageThumb;
 use App\Storage\StorageLocator;
 use Intervention\Image\Drivers\Imagick\Driver as ImagickDriver;
@@ -40,14 +39,14 @@ class ImageManipulationService
         return $this;
     }
 
-    public function generateImageThumb(Image $image, int $width = 420): ImageThumb
+    public function generateImageThumb(string $path, int $width = 420): ImageThumb
     {
-        $data = \fopen($image->getSrc(), 'r');
+        $data = \fopen($path, 'r');
         $data = $this->manager->read($data)->scaleDown($width);
         $path = sprintf(
             "%s_%s.webp",
             self::IMAGE_RESIZED_FILENAME,
-            hash('md5', $image->getSrc()),
+            hash('md5', $path),
         );
 
         $this->storage->writeStream(
@@ -64,26 +63,31 @@ class ImageManipulationService
     }
 
     public function crop(
-        Image $image,
+        string $path,
         int $width,
         int $height,
         int $offsetX,
         int $offsetY,
     ): string {
-        $crop = [
+        $data = \fopen($path, 'r');
+        $data = $this->manager->read($data)->crop(
             $width,
             $height,
             $offsetX,
-            $offsetY
-        ];
-
-        $data = \fopen($image->getSrc(), 'r');
-        $data = $this->manager->read($data)->crop(...$crop);
+            $offsetY,
+            '00000000'
+        );
 
         $path = sprintf(
             "%s_%s.webp",
             self::IMAGE_CROPPED_FILENAME,
-            hash('md5', join('', [$image->getSrc(), ...$crop]))
+            hash('md5', join('', [
+                $path,
+                $width,
+                $height,
+                $offsetX,
+                $offsetY
+            ]))
         );
 
         $this->storage->writeStream(
