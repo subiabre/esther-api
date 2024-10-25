@@ -65,4 +65,25 @@ class LocalDriver implements DriverInterface
             )
         ];
     }
+
+    public function isLocalPath(string $path): bool
+    {
+        $pattern = \sprintf('/^%s/', \preg_quote($this->getPublicUrl()[0], '/'));
+        if (!\preg_match($pattern, $path)) {
+            return false;
+        }
+
+        return $path;
+    }
+
+    public function getAbsolutePath(string $path): string
+    {
+        $pattern = \sprintf('/^%s/', \preg_quote($this->getPublicUrl()[0], '/'));
+
+        return $this->routesService->buildAbsolutePath(
+            LocalDriver::PUBLIC_DIR,
+            LocalDriver::STORAGE_DIR,
+            \preg_replace($pattern, '', $path)
+        );
+    }
 }
