@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Configurable\ConfigurableInterface;
 use App\Configurable\ConfigurableManager;
 use App\Entity\Image;
+use App\Storage\LocalDriver;
 use Aws\Rekognition\RekognitionClient;
 
 class RekognitionService implements VisionInterface, ConfigurableInterface
@@ -15,7 +16,8 @@ class RekognitionService implements VisionInterface, ConfigurableInterface
     private array $config;
 
     public function __construct(
-        private ConfigurableManager $configurableManager
+        private ConfigurableManager $configurableManager,
+        private LocalDriver $localDriver
     ) {
         $service = $configurableManager->get(self::getName());
 
@@ -55,9 +57,14 @@ class RekognitionService implements VisionInterface, ConfigurableInterface
             return [];
         }
 
+        $path = $image->getSrc();
+        if ($this->localDriver->isLocalPath($path)) {
+            $path = $this->localDriver->getAbsolutePath($path);
+        }
+
         $detections = $rekognition->detectFaces([
             'Image' => [
-                'Bytes' => \file_get_contents($image->getSrc())
+                'Bytes' => \file_get_contents($path)
             ],
             'Attributes' => ['DEFAULT']
         ])->toArray();
