@@ -9,7 +9,7 @@ use Aws\Rekognition\RekognitionClient;
 
 class RekognitionService implements VisionInterface, ConfigurableInterface
 {
-    public const FACE_BOX_MARGIN = 1.75;
+    public const FACE_BOX_MARGIN = 1.5;
     public const IMAGE_MAX_SIZE = 5242880;
 
     private array $config;
