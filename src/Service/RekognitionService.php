@@ -11,6 +11,8 @@ use Aws\Rekognition\RekognitionClient;
 class RekognitionService implements VisionInterface, ConfigurableInterface
 {
     public const FACE_BOX_MARGIN = 1.5;
+    public const FACE_CONFIDENCE_MIN = 70;
+
     public const IMAGE_MAX_SIZE = 5242880;
 
     private array $config;
@@ -71,6 +73,10 @@ class RekognitionService implements VisionInterface, ConfigurableInterface
 
         $faces = [];
         foreach ($detections['FaceDetails'] as $detection) {
+            if ($detection['Confidence'] < self::FACE_CONFIDENCE_MIN) {
+                continue;
+            }
+
             $box = $detection['BoundingBox'];
             $boxSize = (int) round(self::FACE_BOX_MARGIN * max(
                 $box["Width"] * $image->getMetadata()->width,
