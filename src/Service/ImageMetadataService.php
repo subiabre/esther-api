@@ -2,32 +2,16 @@
 
 namespace App\Service;
 
-use App\Entity\Image;
 use App\Entity\ImageMetadata;
 
 class ImageMetadataService
 {
-    public function getImageMetadata(Image $image): ImageMetadata
+    public function getImageMetadata(string $path): ImageMetadata
     {
-        $src = $image->getSrc();
+        $imginfo = \getimagesize($path);
 
-        $imginfo = \getimagesize($src);
-        $headers = $this->getHeaders($src);
-
-        $filesize = $imginfo[0] * $imginfo[1] * $imginfo["bits"];
-
-        if (\array_key_exists('content-length', $headers)) {
-            $filesize = $headers['content-length'];
-        }
-
-        $filedate = new \DateTime();
-
-        if (\array_key_exists('last-modified', $headers)) {
-            $filedate = \DateTimeImmutable::createFromFormat(
-                \DateTime::RFC7231,
-                $headers['last-modified']
-            );
-        }
+        $filesize = $this->getFileSize($path);
+        $filedate = $this->getFileDate($path);
 
         return new ImageMetadata(
             $imginfo[0],
@@ -38,19 +22,49 @@ class ImageMetadataService
         );
     }
 
-    private function getHeaders(string $src): array
+    private function getHeaders(string $path): array
     {
-        $headers = [];
-        foreach (get_headers($src, true) as $header => $value) {
-            $headers[strtolower($header)] = $value;
+        $headers = \get_headers($path, true);
+
+        $results = [];
+        foreach ($headers as $key => $value) {
+            $results[strtolower($key)] = $value;
         }
 
-        return $headers;
+        return $results;
     }
 
-    public function getExif(Image $image): array
+    public function getFileSize(string $path): ?int
     {
-        $exif = @\exif_read_data($image->getSrc(), null, true) ?: [];
+        try {
+            $size = \filesize($path);
+        } catch (\ErrorException $e) {
+            $size = $this->getKey($this->getHeaders($path), 'content-length');
+            if (!$size) {
+                return null;
+            }
+        }
+
+        return $size;
+    }
+
+    public function getFileDate(string $path): ?\DateTimeImmutable
+    {
+        try {
+            $date = sprintf("@%d", \filemtime($path));
+        } catch (\ErrorException $e) {
+            $date = $this->getKey($this->getHeaders($path), 'last-modified');
+            if (!$date) {
+                return null;
+            }
+        }
+
+        return \DateTimeImmutable::createFromInterface(new \DateTime($date));
+    }
+
+    public function getExif(string $path): array
+    {
+        $exif = @\exif_read_data($path, null, true) ?: [];
 
         return $this->cleanExif($exif);
     }
@@ -74,7 +88,7 @@ class ImageMetadataService
         return $data;
     }
 
-    public function getExifKey(array $exif, string ...$keys)
+    public function getKey(array $exif, string ...$keys)
     {
         $data = $exif;
         foreach ($keys as $key) {
