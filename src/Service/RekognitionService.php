@@ -10,7 +10,7 @@ use Aws\Rekognition\RekognitionClient;
 
 class RekognitionService implements VisionInterface, ConfigurableInterface
 {
-    public const FACE_BOX_MARGIN = 1.5;
+    public const FACE_BOX_MARGIN_MAX = 0.6;
     public const FACE_CONFIDENCE_MIN = 70;
 
     public const IMAGE_MAX_SIZE = 5242880;
@@ -77,20 +77,40 @@ class RekognitionService implements VisionInterface, ConfigurableInterface
                 continue;
             }
 
+            /** @var array{Width: float, Height: float, Left: float, Top: float} */
             $box = $detection['BoundingBox'];
-            $boxSize = (int) round(self::FACE_BOX_MARGIN * max(
-                $box["Width"] * $image->getMetadata()->width,
-                $box["Height"] * $image->getMetadata()->height
-            ));
+
+            $boxSize = $this->calcBoxSize($box, $image);
+            $offsetX = $this->calcOffsetX($box, $image);
+            $offsetY = $this->calcOffsetY($box, $image);
+            $padding = min($offsetX, $offsetY, (int) (self::FACE_BOX_MARGIN_MAX * $boxSize));
 
             $faces[] = [
-                'width' => $boxSize,
-                'height' => $boxSize,
-                'offsetX' => round(($box["Left"] * $image->getMetadata()->width) - ($boxSize / 3.5)),
-                'offsetY' => round(($box["Top"] * $image->getMetadata()->height) - ($boxSize / 3.5))
+                'width'   => $boxSize + ($padding * 2),
+                'height'  => $boxSize + ($padding * 2),
+                'offsetX' => $offsetX - $padding,
+                'offsetY' => $offsetY - $padding
             ];
         }
 
         return $faces;
+    }
+
+    private function calcOffsetX(array $box, Image $image): int
+    {
+        return (int) round($box['Left'] * $image->getMetadata()->width);
+    }
+
+    private function calcOffsetY(array $box, Image $image): int
+    {
+        return (int) round($box['Top'] * $image->getMetadata()->height);
+    }
+
+    private function calcBoxSize(array $box, Image $image): int
+    {
+        return (int) min(
+            $box['Width'] * $image->getMetadata()->width,
+            $box['Height'] * $image->getMetadata()->height
+        );
     }
 }
