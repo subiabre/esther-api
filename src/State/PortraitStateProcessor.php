@@ -16,8 +16,7 @@ class PortraitStateProcessor implements ProcessorInterface
         private ImageRepository $imageRepository,
         private ImageManipulationService $imageManipulationService,
         private EntityManagerInterface $entityManager
-    ) {
-    }
+    ) {}
 
     /**
      * @param Portrait $data
@@ -25,7 +24,6 @@ class PortraitStateProcessor implements ProcessorInterface
     public function process(mixed $data, API\Operation $operation, array $uriVariables = [], array $context = []): Portrait
     {
         $image = $this->imageRepository->find($uriVariables['id']);
-
         if (!$image) {
             throw new NotFoundHttpException(sprintf("Image with id %s not found", $uriVariables['id']));
         }
@@ -33,7 +31,7 @@ class PortraitStateProcessor implements ProcessorInterface
         $data->setImage($image);
 
         $data->setSrc($this->imageManipulationService->crop(
-            $data->getImage(),
+            $data->getImage()->getSrc(),
             $data->getWidth(),
             $data->getHeight(),
             $data->getOffsetX(),
