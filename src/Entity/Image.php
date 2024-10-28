@@ -140,6 +140,16 @@ class Image
         return $this->portraits;
     }
 
+    /**
+     * @param Collection<int, Portrait>
+     */
+    public function setPortraits(Collection $portraits): static
+    {
+        $this->portraits = $portraits;
+
+        return $this;
+    }
+
     public function addPortrait(Portrait $portrait): static
     {
         if (!$this->portraits->contains($portrait)) {

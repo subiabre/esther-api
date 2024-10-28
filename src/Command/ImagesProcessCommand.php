@@ -9,6 +9,7 @@ use App\Service\ImageVisionService;
 use App\Service\RoutesService;
 use App\Storage\LocalDriver;
 use App\Storage\StorageLocator;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -146,10 +147,10 @@ class ImagesProcessCommand extends Command
                 $portraits = [];
             } else {
                 $portraits = $this->imageVisionService->getPortraits($image);
+                $image->setPortraits(new ArrayCollection([]));
             }
 
             $portraitsCount = count($portraits);
-
             if ($portraitsCount < 1) {
                 continue;
             }
