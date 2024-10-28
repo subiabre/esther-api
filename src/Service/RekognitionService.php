@@ -7,23 +7,32 @@ use App\Configurable\ConfigurableManager;
 use App\Entity\Image;
 use App\Storage\LocalDriver;
 use Aws\Rekognition\RekognitionClient;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Imagick\Driver as ImagickDriver;
 
 class RekognitionService implements VisionInterface, ConfigurableInterface
 {
     public const FACE_BOX_MARGIN_MAX = 0.6;
     public const FACE_CONFIDENCE_MIN = 70;
 
+    /**
+     * @link https://docs.aws.amazon.com/rekognition/latest/APIReference/API_Image.html#API_Image_Contents
+     */
     public const IMAGE_MAX_SIZE = 5242880;
 
     private array $config;
 
+    private ImageManager $imageManager;
+
     public function __construct(
         private ConfigurableManager $configurableManager,
-        private LocalDriver $localDriver
+        private LocalDriver $localDriver,
     ) {
         $service = $configurableManager->get(self::getName());
 
         $this->config = $service ? $service->getConfig() : self::getConfiguration();
+
+        $this->imageManager = new ImageManager(new ImagickDriver());
     }
 
     public static function getName(): string
@@ -51,10 +60,6 @@ class RekognitionService implements VisionInterface, ConfigurableInterface
     {
         $rekognition = new RekognitionClient($this->config);
 
-        if ($image->getMetadata()->filesize > self::IMAGE_MAX_SIZE) {
-            return [];
-        }
-
         if (!in_array($image->getMetadata()->mimeType, ['image/jpeg', 'image/png'])) {
             return [];
         }
@@ -66,7 +71,7 @@ class RekognitionService implements VisionInterface, ConfigurableInterface
 
         $detections = $rekognition->detectFaces([
             'Image' => [
-                'Bytes' => \file_get_contents($path)
+                'Bytes' => $this->readImage($image)
             ],
             'Attributes' => ['DEFAULT']
         ])->toArray();
@@ -112,5 +117,26 @@ class RekognitionService implements VisionInterface, ConfigurableInterface
             $box['Width'] * $image->getMetadata()->width,
             $box['Height'] * $image->getMetadata()->height
         );
+    }
+
+    /**
+     * @return string
+     */
+    private function readImage(Image $image): string
+    {
+        $path = $image->getSrc();
+        if ($this->localDriver->isLocalPath($path)) {
+            $path = $this->localDriver->getAbsolutePath($path);
+        }
+
+        $imagesize = $image->getMetadata()->filesize;
+        if ($imagesize < self::IMAGE_MAX_SIZE) {
+            return \file_get_contents($path);
+        }
+
+        $file = $this->imageManager->read(\fopen($path, 'r'));
+        $quality = (int) ((self::IMAGE_MAX_SIZE * 100) / $imagesize);
+
+        return (string) $file->toJpeg($quality);
     }
 }
