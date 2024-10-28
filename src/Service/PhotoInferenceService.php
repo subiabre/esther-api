@@ -57,13 +57,14 @@ class PhotoInferenceService
         string $pattern
     ): array {
         $needle = $photo->getImages()[0];
+        $needlename = \strtoupper($needle->getSrcFilename());
 
-        \preg_match("/$pattern/", $needle->getSrcFilename(), $patternMatches);
+        \preg_match("/$pattern/", $needlename, $patternMatches);
         if (empty($patternMatches)) {
             return [];
         }
 
-        $key = \preg_replace("/$patternMatches[0]/", "", $needle->getSrcFilename());
+        $key = \preg_quote(\preg_replace("/$pattern/", "", $needlename));
 
         $choices = [];
         foreach ($images as $image) {
@@ -71,8 +72,7 @@ class PhotoInferenceService
                 continue;
             }
 
-            $filename = $image->getSrcFilename();
-
+            $filename = \strtoupper($image->getSrcFilename());
             if (!\preg_match("/$key$pattern/", $filename)) {
                 continue;
             }
