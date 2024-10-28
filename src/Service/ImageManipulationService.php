@@ -24,7 +24,7 @@ class ImageManipulationService
     {
         $this->manager = new ImageManager(new ImagickDriver);
 
-        $this->storage = $storageLocator->getFilesystem();
+        $this->storage = $storageLocator->getFilesystem('local');
     }
 
     public function getStorage(): Filesystem
