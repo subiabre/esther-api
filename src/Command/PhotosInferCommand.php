@@ -50,11 +50,18 @@ class PhotosInferCommand extends Command
             'date-filename',
             null,
             InputOption::VALUE_NONE,
-            'Extract photo date ranges from image filenames'
+            join("\n", [
+                'Extract photo date ranges from image filenames',
+                'Any number and hyphen string at the start of the filename that can be processed as a date will apply',
+                'The following optional modifiers at the end of the date apply:',
+                '<comment>a</comment> ~1 year, e.g: 1991a = 1990..1992',
+                '<comment>b</comment> ~3 years, e.g: 2000b = 1997..2003',
+                '<comment>c</comment> ~5 years, e.g: 1985c = 1980..1990'
+            ])
         );
 
         $this->addOption(
-            'image-match-by',
+            'match-by',
             'M',
             InputOption::VALUE_OPTIONAL,
             'Define the strategy (fuzzy|regex|none) by which to decide images photo matching',
@@ -62,18 +69,18 @@ class PhotosInferCommand extends Command
         );
 
         $this->addOption(
-            'fuzzy-min',
+            'match-fuzzy-max',
             null,
             InputOption::VALUE_OPTIONAL,
-            'A threshold of 0.0 requires a perfect match (of both letters and location), a threshold of 1.0 would match anything',
+            'Max threshold, 0.0 requires a perfect match (i.e no fuzzy), a threshold of 1.0 matches anything',
             0.2
         );
 
         $this->addOption(
-            'regex-pattern',
+            'match-regex',
             null,
             InputOption::VALUE_OPTIONAL,
-            'Pattern will be removed from image filename and regex matching will be performed on base filename + pattern',
+            'Filename (case insensitive) + RegEx pattern variable part that will match image filenames',
             '[A-B]$'
         );
     }
@@ -122,7 +129,7 @@ class PhotosInferCommand extends Command
             ));
 
             if ($input->getOption('date-filename')) {
-                $date = $this->parseDateInFilename($image->getSrcFilename());
+                $date = $this->photoInferenceService->parseDateInFilename($image->getSrcFilename());
                 $yearInFilename = $date->getMin()->format('Y');
                 $yearInFiledate = $image->getMetadata()->filedate->format('Y');
 
@@ -131,7 +138,8 @@ class PhotosInferCommand extends Command
                 }
             }
 
-            switch (ltrim($input->getOption('image-match-by'), '=')) {
+            $imageMatchBy = ltrim($input->getOption('match-by'), '=');
+            switch ($imageMatchBy) {
                 case 'none':
                     $imageMatches = [];
                     break;
@@ -139,14 +147,14 @@ class PhotosInferCommand extends Command
                     $imageMatches = $this->photoInferenceService->matchPhotoImagesByFuzzy(
                         $photo,
                         $imagesNotInferred,
-                        $input->getOption('fuzzy-min')
+                        $input->getOption('match-fuzzy-max')
                     );
                     break;
                 case 'regex':
                     $imageMatches = $this->photoInferenceService->matchPhotoImagesByRegex(
                         $photo,
                         $imagesNotInferred,
-                        $input->getOption('regex-pattern')
+                        $input->getOption('match-regex'),
                     );
                     break;
             }
@@ -156,7 +164,7 @@ class PhotosInferCommand extends Command
 
                 $imageMatchesQuestion = new ChoiceQuestion(
                     sprintf(
-                        " [?] The following image could be added to the Photo along with...\n  [i] <comment>%s</comment>",
+                        " [i] <comment>%s</comment> is related to",
                         $image->getSrcFilename()
                     ),
                     ["None", ...$imageMatches]
@@ -187,35 +195,5 @@ class PhotosInferCommand extends Command
         $io->success(sprintf("Inferred %d Photos from %d Images", $inferredTotal, count($images)));
 
         return Command::SUCCESS;
-    }
-
-    private function parseDateInFilename(string $filename): ?PhotoDateRange
-    {
-        \preg_match("/[0-9-]+/", $filename, $numbersInFilename);
-
-        foreach ($numbersInFilename as $number) {
-            if (strlen($number) < 4) {
-                continue;
-            }
-
-            if (strlen($number) === 4) {
-                $number = \sprintf("%d-01-01", $number);
-            }
-
-            try {
-                $date = new \DateTime($number);
-            } catch (\Exception $e) {
-                continue;
-            }
-
-            if ($date > new \DateTime()) {
-                continue;
-            }
-
-            return new PhotoDateRange(
-                clone $date->setDate($date->format('Y'), 1, 1)->setTime(0, 0, 0),
-                clone $date->setDate($date->format('Y'), 12, 31)->setTime(0, 0, 0),
-            );
-        }
     }
 }
