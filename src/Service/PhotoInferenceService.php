@@ -9,6 +9,8 @@ use Fuse\Fuse;
 
 class PhotoInferenceService
 {
+    public const DATE_FORMAT = 'Y-m-d';
+
     public const DATE_MODIFIER_X1 = 'a';
     public const DATE_MODIFIER_X3 = 'b';
     public const DATE_MODIFIER_X5 = 'c';
@@ -100,7 +102,11 @@ class PhotoInferenceService
         $filedate = explode(' ', $filename)[0];
 
         try {
-            $date = new \DateTime($filedate);
+            $replace = \preg_replace('/[a-c]/', '', $filedate);
+            $date = \DateTime::createFromFormat(
+                self::DATE_FORMAT,
+                \substr_replace('YYYY-01-01', $replace, 0, \strlen($replace))
+            );
 
             $max = clone $date;
             $min = clone $date;
