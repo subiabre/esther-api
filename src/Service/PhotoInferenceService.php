@@ -9,11 +9,9 @@ use Fuse\Fuse;
 
 class PhotoInferenceService
 {
-    public const DATE_FILENAME_PATTERN = '/^[0-9-]+([a-z]+)?+/';
-
-    public const DATE_MODIFIER_1Y = 'a';
-    public const DATE_MODIFIER_3Y = 'b';
-    public const DATE_MODIFIER_5Y = 'c';
+    public const DATE_MODIFIER_X1 = 'a';
+    public const DATE_MODIFIER_X3 = 'b';
+    public const DATE_MODIFIER_X5 = 'c';
 
     /**
      * @param Photo $photo
@@ -99,56 +97,61 @@ class PhotoInferenceService
 
     public function parseDateInFilename(string $filename): ?PhotoDateRange
     {
-        \preg_match(self::DATE_FILENAME_PATTERN, $filename, $dateInFilename);
+        $filedate = explode(' ', $filename)[0];
 
-        if (empty($dateInFilename)) {
-            return null;
-        }
+        try {
+            $date = new \DateTime($filedate);
 
-        $date = $dateInFilename[0];
-
-        if (\strlen($date) < 4) {
-            return null;
-        }
-
-        if (\strlen($date) === 4) {
-            $date = new \DateTime(\sprintf("%d-01-01", $date));
-
-            if ($date > new \DateTime()) {
-                return null;
-            }
-
-            $min = clone $date->setDate($date->format('Y'), 1, 1)->setTime(0, 0, 0);
-            $max = clone $date->setDate($date->format('Y'), 12, 31)->setTime(0, 0, 0);
-        } else {
-            try {
-                $date = new \DateTime($date);
-            } catch (\Exception $e) {
-                return null;
-            }
-
-            if ($date > new \DateTime()) {
-                return null;
-            }
-
-            $min = clone $date;
             $max = clone $date;
+            $min = clone $date;
+        } catch (\Exception $e) {
+            return null;
         }
 
-        $modifier = $dateInFilename[1] ?? false;
-        if ($modifier === self::DATE_MODIFIER_5Y) {
-            $min = $min->modify('-5 years');
-            $max = $max->modify('+5 years');
+        \preg_match('/^[0-9]{4}([a-c])?/', $filedate, $year);
+        if ($modifier = $year[1] ?? false) {
+            $modifiers = [
+                self::DATE_MODIFIER_X1 => '1 year',
+                self::DATE_MODIFIER_X3 => '3 years',
+                self::DATE_MODIFIER_X5 => '5 years'
+            ];
+
+            $max->modify(\sprintf('+%s', $modifiers[$modifier]));
+            $min->modify(\sprintf('-%s', $modifiers[$modifier]));
         }
 
-        if ($modifier === self::DATE_MODIFIER_3Y) {
-            $min = $min->modify('-3 years');
-            $max = $max->modify('+3 years');
+        \preg_match('/-[0-9]{2}([a-c])?-/', $filedate, $dateMonth);
+        if (empty($dateMonth)) {
+            $max->modify('last day of december');
+            $min->modify('first day of january');
         }
 
-        if ($modifier === self::DATE_MODIFIER_1Y) {
-            $min = $min->modify('-1 year');
-            $max = $max->modify('+1 year');
+        if ($modifier = $dateMonth[1] ?? false) {
+            $modifiers = [
+                self::DATE_MODIFIER_X1 => '1 month',
+                self::DATE_MODIFIER_X3 => '3 months',
+                self::DATE_MODIFIER_X5 => '5 months'
+            ];
+
+            $max->modify(\sprintf('+%s', $modifiers[$modifier]));
+            $min->modify(\sprintf('-%s', $modifiers[$modifier]));
+        }
+
+        \preg_match('/-[0-9]{2}([a-c])?$/', $filedate, $dateDay);
+        if (empty($dateDay)) {
+            $max->modify('last day of this month');
+            $min->modify('first day of this month');
+        }
+
+        if ($modifier = $dateDay[1] ?? false) {
+            $modifiers = [
+                self::DATE_MODIFIER_X1 => '1 dateDay',
+                self::DATE_MODIFIER_X3 => '3 days',
+                self::DATE_MODIFIER_X5 => '5 days'
+            ];
+
+            $max->modify(\sprintf('+%s', $modifiers[$modifier]));
+            $min->modify(\sprintf('-%s', $modifiers[$modifier]));
         }
 
         return new PhotoDateRange($min, $max);
