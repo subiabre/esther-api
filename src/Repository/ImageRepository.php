@@ -24,11 +24,22 @@ class ImageRepository extends ServiceEntityRepository
     /**
      * @return Image[] Returns Images without a Photo
      */
+    public function findAll(): array
+    {
+        return $this->createQueryBuilder('i')
+            ->orderBy('i.src', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return Image[] Returns Images without a Photo
+     */
     public function findDangling(): array
     {
         return $this->createQueryBuilder('i')
             ->andWhere('i.photo IS NULL')
-            ->orderBy('i.id', 'ASC')
+            ->orderBy('i.src', 'ASC')
             ->getQuery()
             ->getResult();
     }
