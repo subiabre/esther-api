@@ -2,6 +2,7 @@
 
 namespace App\Validator;
 
+use App\Storage\LocalDriver;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
@@ -9,6 +10,10 @@ use Symfony\Component\Validator\Exception\UnexpectedValueException;
 
 class ImageFileValidator extends ConstraintValidator
 {
+    public function __construct(
+        private LocalDriver $local
+    ) {}
+
     public function validate(mixed $value, Constraint $constraint): void
     {
         if (!$constraint instanceof ImageFile) {
@@ -23,7 +28,12 @@ class ImageFileValidator extends ConstraintValidator
             throw new UnexpectedValueException($value, 'string');
         }
 
-        if (self::isImage($value)) {
+        $path = $value;
+        if ($this->local->isLocalPath($value)) {
+            $path = $this->local->getAbsolutePath($value);
+        }
+
+        if (self::isImage($path)) {
             return;
         }
 
@@ -32,14 +42,14 @@ class ImageFileValidator extends ConstraintValidator
             ->addViolation();
     }
 
-    public static function isImage(string $file): bool
+    public static function isImage(string $path): bool
     {
         try {
             /**
              * @disregard Imagick is loaded in the docker container
              * @see docker/php/Dockerfile
              */
-            $image = new \Imagick($file);
+            $image = new \Imagick($path);
 
             return $image->valid();
         } catch (\Exception $e) {
