@@ -52,11 +52,8 @@ class PhotosInferCommand extends Command
             InputOption::VALUE_NONE,
             join("\n", [
                 'Extract photo date ranges from image filenames',
-                'Date must be at start of filename, year required, format in YYYY-MM-DD',
-                'The following optional modifiers at the end of year, month and day apply:',
-                sprintf('<comment>%s</comment> ~1, e.g: 1995a = 1994..1996', PhotoInferenceService::DATE_MODIFIER_X1),
-                sprintf('<comment>%s</comment> ~3, e.g: 1995b = 1992..1998', PhotoInferenceService::DATE_MODIFIER_X3),
-                sprintf('<comment>%s</comment> ~5, e.g: 1995c = 1990..2000', PhotoInferenceService::DATE_MODIFIER_X5)
+                'Range in the format <lower>[..<upper>], where `lower` and `upper` are ISO8601 partial or complete strings',
+                'Must be at start of filename'
             ])
         );
 
@@ -129,7 +126,7 @@ class PhotosInferCommand extends Command
             ));
 
             if ($input->getOption('date-filename')) {
-                $date = $this->photoInferenceService->parseDateInFilename($image->getSrcFilename());
+                $date = $this->photoInferenceService->getDateRangeInFilename($image->getSrcFilename());
                 $yearInFilename = $date->getMin()->format('Y');
                 $yearInFiledate = $image->getMetadata()->filedate->format('Y');
 

@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Entity\Photo;
 use App\Entity\PhotoDateRange;
 use App\Entity\User;
+use App\Range\DateRange;
 use App\Repository\PhotoRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -49,8 +50,8 @@ class PhotosUpdateCommand extends Command
             null,
             InputOption::VALUE_OPTIONAL,
             join("\n", [
-                "A date range in the format <start-date>:<end-date>",
-                "e.g: 2001-01-01:2001-31-12",
+                'A date range, upper value inclusive',
+                'Range in the format <lower>[..<upper>], where `lower` and `upper` are ISO8601 partial or complete strings'
             ])
         );
     }
@@ -65,7 +66,7 @@ class PhotosUpdateCommand extends Command
             foreach ($photos as $photo) {
                 $dateRange = $input->getOption('date-range');
                 if ($dateRange) {
-                    $photo->setDate($this->parseDateRange($dateRange));
+                    $photo->setDate($this->getPhotoDateRange($dateRange));
                 }
 
                 $rolesToAdd = $input->getOption('add-role');
@@ -125,19 +126,10 @@ class PhotosUpdateCommand extends Command
         return $photos;
     }
 
-    private function parseDateRange(string $range): PhotoDateRange
+    private function getPhotoDateRange(string $range): PhotoDateRange
     {
-        $dates = \array_map(function ($date) {
-            return new \DateTime($date);
-        }, explode(':', $range));
+        $range = DateRange::fromString($range);
 
-        if ($dates[1] < $dates[0]) {
-            throw new \Exception(sprintf(
-                "Invalid Date range: '%s'. End date can't be lower than the start date",
-                $range
-            ));
-        }
-
-        return new PhotoDateRange($dates[0], $dates[1]);
+        return new PhotoDateRange($range->lower, $range->upper);
     }
 }

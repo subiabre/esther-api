@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\Image;
 use App\Entity\Photo;
 use App\Entity\PhotoDateRange;
+use App\Range\DateRange;
 use Fuse\Fuse;
 
 class PhotoInferenceService
@@ -97,69 +98,16 @@ class PhotoInferenceService
         }, \array_values($choices));
     }
 
-    public function parseDateInFilename(string $filename): ?PhotoDateRange
+    public function getDateRangeInFilename(string $filename): ?PhotoDateRange
     {
-        $filedate = explode(' ', $filename)[0];
+        \preg_match('/^[0-9]{4}(?=-|\.\.|[^0-9])/', $filename, $match);
 
-        try {
-            $replace = \preg_replace('/[a-c]/', '', $filedate);
-            $date = \DateTime::createFromFormat(
-                self::DATE_FORMAT,
-                \substr_replace('YYYY-01-01', $replace, 0, \strlen($replace))
-            );
-
-            $max = clone $date;
-            $min = clone $date;
-        } catch (\Exception $e) {
+        if (empty($match)) {
             return null;
         }
 
-        \preg_match('/^[0-9]{4}([a-c])?/', $filedate, $year);
-        if ($modifier = $year[1] ?? false) {
-            $modifiers = [
-                self::DATE_MODIFIER_X1 => '1 year',
-                self::DATE_MODIFIER_X3 => '3 years',
-                self::DATE_MODIFIER_X5 => '5 years'
-            ];
+        $range = DateRange::fromString($match[0]);
 
-            $max->modify(\sprintf('+%s', $modifiers[$modifier]));
-            $min->modify(\sprintf('-%s', $modifiers[$modifier]));
-        }
-
-        \preg_match('/-[0-9]{2}([a-c])?-/', $filedate, $dateMonth);
-        if (empty($dateMonth)) {
-            $max->modify('last day of december');
-            $min->modify('first day of january');
-        }
-
-        if ($modifier = $dateMonth[1] ?? false) {
-            $modifiers = [
-                self::DATE_MODIFIER_X1 => '1 month',
-                self::DATE_MODIFIER_X3 => '3 months',
-                self::DATE_MODIFIER_X5 => '5 months'
-            ];
-
-            $max->modify(\sprintf('+%s', $modifiers[$modifier]));
-            $min->modify(\sprintf('-%s', $modifiers[$modifier]));
-        }
-
-        \preg_match('/-[0-9]{2}([a-c])?$/', $filedate, $dateDay);
-        if (empty($dateDay)) {
-            $max->modify('last day of this month');
-            $min->modify('first day of this month');
-        }
-
-        if ($modifier = $dateDay[1] ?? false) {
-            $modifiers = [
-                self::DATE_MODIFIER_X1 => '1 dateDay',
-                self::DATE_MODIFIER_X3 => '3 days',
-                self::DATE_MODIFIER_X5 => '5 days'
-            ];
-
-            $max->modify(\sprintf('+%s', $modifiers[$modifier]));
-            $min->modify(\sprintf('-%s', $modifiers[$modifier]));
-        }
-
-        return new PhotoDateRange($min, $max);
+        return new PhotoDateRange($range->lower, $range->upper);
     }
 }
