@@ -140,7 +140,7 @@ class PhotosInferCommand extends Command
                 }
             }
 
-            $imageMatchBy = ltrim($input->getOption('match-by'), '=');
+            $imageMatchBy = ltrim($input->getOption('match'), '=');
             switch ($imageMatchBy) {
                 case 'none':
                     $imageMatches = [];
