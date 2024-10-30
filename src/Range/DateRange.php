@@ -46,7 +46,7 @@ class DateRange
         $ubound = $bounds[1] ?? $lbound;
 
         $lower = \substr_replace('YYYY-01-01T00:00:00Z', $lbound, 0, \strlen($lbound));
-        $upper = \substr_replace('YYYY-12-01T23:59:59Z', $ubound, 0, \strlen($ubound));
+        $upper = \substr_replace('YYYY-12-01T23:59:00Z', $ubound, 0, \strlen($ubound));
 
         $lower = \DateTime::createFromFormat(\DateTime::ATOM, $lower);
         $upper = \DateTime::createFromFormat(\DateTime::ATOM, $upper);
