@@ -58,19 +58,16 @@ class PhotosInferCommand extends Command
         );
 
         $this->addOption(
-            'match-by',
+            'match',
             'M',
             InputOption::VALUE_OPTIONAL,
-            'Define the strategy (fuzzy|regex|none) by which to decide images photo matching',
-            'fuzzy'
-        );
-
-        $this->addOption(
-            'match-fuzzy-max',
-            null,
-            InputOption::VALUE_OPTIONAL,
-            'Max threshold, 0.0 requires a perfect match (i.e no fuzzy), a threshold of 1.0 matches anything',
-            0.2
+            join("\n", [
+                'Define the strategy by which to consider Images that can be related to others in the same Photo',
+                '<comment>none</comment> does not infer relationship',
+                '<comment>regex</comment> infers relationship based on filename regex lookups',
+                '<comment>fuzzy</comment> infers relationship based on filename fuzzy distance sorting',
+            ]),
+            'none'
         );
 
         $this->addOption(
@@ -79,6 +76,14 @@ class PhotosInferCommand extends Command
             InputOption::VALUE_OPTIONAL,
             'Filename (case insensitive) + RegEx pattern variable part that will match image filenames',
             '[A-B]$'
+        );
+
+        $this->addOption(
+            'match-fuzzy-max',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'Max threshold, 0.0 requires a perfect match (i.e no fuzzy), a threshold of 1.0 matches anything',
+            0.2
         );
     }
 
@@ -140,18 +145,18 @@ class PhotosInferCommand extends Command
                 case 'none':
                     $imageMatches = [];
                     break;
-                case 'fuzzy':
-                    $imageMatches = $this->photoInferenceService->matchPhotoImagesByFuzzy(
-                        $photo,
-                        $imagesNotInferred,
-                        $input->getOption('match-fuzzy-max')
-                    );
-                    break;
                 case 'regex':
                     $imageMatches = $this->photoInferenceService->matchPhotoImagesByRegex(
                         $photo,
                         $imagesNotInferred,
                         $input->getOption('match-regex'),
+                    );
+                    break;
+                case 'fuzzy':
+                    $imageMatches = $this->photoInferenceService->matchPhotoImagesByFuzzy(
+                        $photo,
+                        $imagesNotInferred,
+                        $input->getOption('match-fuzzy-max')
                     );
                     break;
             }
