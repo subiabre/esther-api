@@ -8,7 +8,6 @@ use League\Flysystem\Local\LocalFilesystemAdapter;
 
 class LocalDriver implements DriverInterface
 {
-    public const PUBLIC_DIR = 'public';
     public const STORAGE_DIR = 'storage';
 
     private string $url;
@@ -17,9 +16,9 @@ class LocalDriver implements DriverInterface
     public function __construct(
         private RoutesService $routesService
     ) {
-        $this->url = $this->routesService->getAbsoluteUrl('app_index');
+        $this->url = $this->routesService->getLocalStorageUrl();
 
-        $path = $this->routesService->buildAbsolutePath(self::PUBLIC_DIR, self::STORAGE_DIR);
+        $path = $this->routesService->getLocalStoragePath();
 
         if (\file_exists($path) && !\is_dir($path)) {
             throw new \Exception();
@@ -58,32 +57,7 @@ class LocalDriver implements DriverInterface
     public function getPublicUrl(): array
     {
         return [
-            \sprintf(
-                "%s%s",
-                $this->url,
-                self::STORAGE_DIR
-            )
+            $this->url
         ];
-    }
-
-    public function isLocalPath(string $path): bool
-    {
-        $pattern = \sprintf('/^%s/', \preg_quote($this->getPublicUrl()[0], '/'));
-        if (!\preg_match($pattern, $path)) {
-            return false;
-        }
-
-        return $path;
-    }
-
-    public function getAbsolutePath(string $path): string
-    {
-        $pattern = \sprintf('/^%s/', \preg_quote($this->getPublicUrl()[0], '/'));
-
-        return $this->routesService->buildAbsolutePath(
-            LocalDriver::PUBLIC_DIR,
-            LocalDriver::STORAGE_DIR,
-            \preg_replace($pattern, '', $path)
-        );
     }
 }

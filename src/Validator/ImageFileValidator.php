@@ -2,7 +2,7 @@
 
 namespace App\Validator;
 
-use App\Storage\LocalDriver;
+use App\Service\RoutesService;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Exception\UnexpectedValueException;
 class ImageFileValidator extends ConstraintValidator
 {
     public function __construct(
-        private LocalDriver $local
+        private RoutesService $routesService
     ) {}
 
     public function validate(mixed $value, Constraint $constraint): void
@@ -28,10 +28,7 @@ class ImageFileValidator extends ConstraintValidator
             throw new UnexpectedValueException($value, 'string');
         }
 
-        $path = $value;
-        if ($this->local->isLocalPath($value)) {
-            $path = $this->local->getAbsolutePath($value);
-        }
+        $path = $this->routesService->getLocalUrlAsPath($value);
 
         if (self::isImage($path)) {
             return;

@@ -26,7 +26,7 @@ class RekognitionService implements VisionInterface, ConfigurableInterface
 
     public function __construct(
         private ConfigurableManager $configurableManager,
-        private LocalDriver $localDriver,
+        private RoutesService $routesService,
     ) {
         $service = $configurableManager->get(self::getName());
 
@@ -62,11 +62,6 @@ class RekognitionService implements VisionInterface, ConfigurableInterface
 
         if (!in_array($image->getMetadata()->mimeType, ['image/jpeg', 'image/png'])) {
             return [];
-        }
-
-        $path = $image->getSrc();
-        if ($this->localDriver->isLocalPath($path)) {
-            $path = $this->localDriver->getAbsolutePath($path);
         }
 
         $detections = $rekognition->detectFaces([
@@ -124,10 +119,7 @@ class RekognitionService implements VisionInterface, ConfigurableInterface
      */
     private function readImage(Image $image): string
     {
-        $path = $image->getSrc();
-        if ($this->localDriver->isLocalPath($path)) {
-            $path = $this->localDriver->getAbsolutePath($path);
-        }
+        $path = $this->routesService->getLocalUrlAsPath($image->getSrc());
 
         $imagesize = $image->getMetadata()->filesize;
         if ($imagesize < self::IMAGE_MAX_SIZE) {

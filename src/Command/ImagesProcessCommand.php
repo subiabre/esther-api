@@ -7,7 +7,6 @@ use App\Service\ImageManipulationService;
 use App\Service\ImageMetadataService;
 use App\Service\ImageVisionService;
 use App\Service\RoutesService;
-use App\Storage\LocalDriver;
 use App\Storage\StorageLocator;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,7 +26,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class ImagesProcessCommand extends Command
 {
     public function __construct(
-        private LocalDriver $localDriver,
         private RoutesService $routesService,
         private StorageLocator $storageLocator,
         private ImageRepository $imageRepository,
@@ -121,10 +119,7 @@ class ImagesProcessCommand extends Command
                 $image->setAlt($image->getSrcFilename());
             }
 
-            $path = $image->getSrc();
-            if ($this->localDriver->isLocalPath($path)) {
-                $path = $this->localDriver->getAbsolutePath($path);
-            }
+            $path = $this->routesService->getLocalUrlAsPath($image->getSrc());
 
             if (!$input->getOption('no-metadata')) {
                 $exif = $this->imageMetadataService->getExif($path);
