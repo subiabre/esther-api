@@ -6,7 +6,6 @@ use ApiPlatform\Metadata as API;
 use App\Entity\Trait\TimestampableCreation;
 use App\Entity\Trait\TimestampableUpdation;
 use App\Repository\ImageRepository;
-use App\Service\RoutesService;
 use App\State\ImageStateProcessor;
 use App\Validator\ImageFile;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -43,7 +42,7 @@ class Image
      * Fully qualified path to the file.
      */
     #[Assert\NotBlank()]
-    #[Assert\Url()]
+    #[Assert\Url(message: 'The url {{ value }} is not a valid url')]
     #[ImageFile()]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $src = null;
@@ -98,7 +97,8 @@ class Image
 
     public function setSrc(string $src): static
     {
-        $this->src = $src;
+        $filename = \pathinfo($src)['filename'];
+        $this->src = \str_replace($filename, \rawurlencode($filename), $src);
 
         return $this;
     }
