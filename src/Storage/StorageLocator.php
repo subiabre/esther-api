@@ -28,26 +28,22 @@ class StorageLocator
 
     public function getDriverByName(string $name): ?DriverInterface
     {
-        $result = null;
-
         foreach ($this->drivers as $driver) {
             if ($driver::getName() === $name) {
-                $result = $driver;
+                return $driver;
             }
         }
 
-        return $result;
+        return null;
     }
 
     public function getFilesystem(string $name = 'local'): Filesystem
     {
-        $driver = $name ? $this->getDriverByName($name) : $this->drivers[0];
+        $driver = $this->getDriverByName($name);
 
         return new Filesystem(
             $driver->getAdapter(),
-            [
-                'public_url' => $driver->getPublicUrl()
-            ]
+            ['public_url' => $driver->getPublicUrl()]
         );
     }
 }
