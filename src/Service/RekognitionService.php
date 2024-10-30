@@ -121,9 +121,14 @@ class RekognitionService implements VisionInterface, ConfigurableInterface
     {
         $path = $this->routesService->getLocalUrlAsPath($image->getSrc());
 
-        $quality = (self::IMAGE_MAX_SIZE * 100) / $image->getMetadata()->filesize;
+        $filesize = $image->getMetadata()->filesize;
+        if ($filesize < self::IMAGE_MAX_SIZE) {
+            return \file_get_contents($path);
+        }
+
+        $quality = (self::IMAGE_MAX_SIZE * 100) / $filesize;
 
         $file = $this->imageManager->read(\fopen($path, 'r'));
-        return (string) $file->toJpeg(min(99, (int) $quality));
+        return (string) $file->toJpeg(min(95, (int) $quality));
     }
 }
