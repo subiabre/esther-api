@@ -10,11 +10,7 @@ use Fuse\Fuse;
 
 class PhotoInferenceService
 {
-    public const DATE_FORMAT = 'Y-m-d';
-
-    public const DATE_MODIFIER_X1 = 'a';
-    public const DATE_MODIFIER_X3 = 'b';
-    public const DATE_MODIFIER_X5 = 'c';
+    public const REGEX_PARTIAL_ISO8601 = '[0-9]{4}(-[0-9]{2}){0,2}(T[0-9]{2}(:[0-9]{2}){0,2}(Z|\+[0-9:]+)?)?';
 
     /**
      * @param Photo $photo
@@ -100,13 +96,20 @@ class PhotoInferenceService
 
     public function getDateRangeInFilename(string $filename): ?PhotoDateRange
     {
-        \preg_match('/^[0-9]{4}(?=-|\.\.|[^0-9])/', $filename, $match);
+        $pattern = \sprintf(
+            '/^%s(%s%s)?/s',
+            self::REGEX_PARTIAL_ISO8601,
+            \preg_quote(DateRange::OPERATOR),
+            self::REGEX_PARTIAL_ISO8601
+        );
 
-        if (empty($match)) {
+        \preg_match($pattern, $filename, $matches);
+
+        if (empty($matches)) {
             return null;
         }
 
-        $range = DateRange::fromString($match[0]);
+        $range = DateRange::fromString($matches[0]);
 
         return new PhotoDateRange($range->lower, $range->upper);
     }
