@@ -56,8 +56,8 @@ class PhotosCreateCommand extends Command
         foreach ($input->getOption('add-image') as $src) {
             $image = new Image;
             $image->setSrc($src);
-            $image->setThumb($this->imageManipulationService->generateImageThumb($image));
-            $image->setMetadata($this->imageMetadataService->generateImageMetadata($image));
+            $image->setThumb($this->imageManipulationService->generateImageThumb($image->getSrc()));
+            $image->setMetadata($this->imageMetadataService->getImageMetadata($image->getSrc()));
 
             $photo->addImage($image);
         }
