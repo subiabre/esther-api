@@ -68,13 +68,12 @@ class ImagesImportCommand extends Command
 
         $importedTotal = 0;
         foreach ($listing as $item) {
-            $path = $item->path();
+            $src = $storage->publicUrl($item->path());
+            $path = $this->routesService->getLocalUrlAsPath($src);
 
             if (!ImageFileValidator::isImage($path)) {
                 continue;
             }
-
-            $src = $storage->publicUrl($path);
 
             $image = $this->imageRepository->findOneBySrc($src);
             $imageExists = $image ? true : false;
