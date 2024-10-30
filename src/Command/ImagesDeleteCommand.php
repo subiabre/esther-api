@@ -78,7 +78,6 @@ class ImagesDeleteCommand extends Command
     
                 return Command::FAILURE;
             }
-
         }
 
         foreach ($images as $image) {

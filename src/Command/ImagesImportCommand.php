@@ -6,7 +6,6 @@ use App\Entity\Image;
 use App\Repository\ImageRepository;
 use App\Service\ImageMetadataService;
 use App\Service\RoutesService;
-use App\Storage\LocalDriver;
 use App\Storage\StorageLocator;
 use App\Validator\ImageFileValidator;
 use Doctrine\ORM\EntityManagerInterface;
@@ -69,20 +68,13 @@ class ImagesImportCommand extends Command
 
         $importedTotal = 0;
         foreach ($listing as $item) {
-            $src = $storage->publicUrl($item->path());
-
-            $path = $src;
-            if ($driver === LocalDriver::getName()) {
-                $path = $this->routesService->buildAbsolutePath(
-                    LocalDriver::PUBLIC_DIR,
-                    LocalDriver::STORAGE_DIR,
-                    $item->path()
-                );
-            }
+            $path = $item->path();
 
             if (!ImageFileValidator::isImage($path)) {
                 continue;
             }
+
+            $src = $storage->publicUrl($path);
 
             $image = $this->imageRepository->findOneBySrc($src);
             $imageExists = $image ? true : false;
