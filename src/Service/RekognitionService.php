@@ -5,7 +5,6 @@ namespace App\Service;
 use App\Configurable\ConfigurableInterface;
 use App\Configurable\ConfigurableManager;
 use App\Entity\Image;
-use App\Storage\LocalDriver;
 use Aws\Rekognition\RekognitionClient;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Imagick\Driver as ImagickDriver;
@@ -16,9 +15,10 @@ class RekognitionService implements VisionInterface, ConfigurableInterface
     public const FACE_CONFIDENCE_MIN = 70;
 
     /**
+     * Rekognition's limit is 5MB, we target 4,9 just for safety
      * @link https://docs.aws.amazon.com/rekognition/latest/APIReference/API_Image.html#API_Image_Contents
      */
-    public const IMAGE_MAX_SIZE = 5242880;
+    public const IMAGE_MAX_SIZE = 4980736;
 
     private array $config;
 
@@ -65,11 +65,11 @@ class RekognitionService implements VisionInterface, ConfigurableInterface
         }
 
         $detections = $rekognition->detectFaces([
+            'Attributes' => ['DEFAULT'],
             'Image' => [
                 'Bytes' => $this->readImage($image)
-            ],
-            'Attributes' => ['DEFAULT']
-        ])->toArray();
+            ]
+        ]);
 
         $faces = [];
         foreach ($detections['FaceDetails'] as $detection) {
@@ -121,14 +121,9 @@ class RekognitionService implements VisionInterface, ConfigurableInterface
     {
         $path = $this->routesService->getLocalUrlAsPath($image->getSrc());
 
-        $imagesize = $image->getMetadata()->filesize;
-        if ($imagesize < self::IMAGE_MAX_SIZE) {
-            return \file_get_contents($path);
-        }
+        $quality = (self::IMAGE_MAX_SIZE * 100) / $image->getMetadata()->filesize;
 
         $file = $this->imageManager->read(\fopen($path, 'r'));
-        $quality = (int) ((self::IMAGE_MAX_SIZE * 100) / $imagesize);
-
-        return (string) $file->toJpeg($quality);
+        return (string) $file->toJpeg(min(99, (int) $quality));
     }
 }
