@@ -66,6 +66,7 @@ class Photo
         SearchFilter::class,
         properties: ['images.alt' => 'partial', 'images.portraits.person'],
     )]
+    #[ORM\OrderBy(['src' => 'ASC'])]
     #[ORM\OneToMany(
         targetEntity: Image::class,
         mappedBy: 'photo',
