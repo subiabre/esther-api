@@ -34,10 +34,18 @@ class Photo
     use TimestampableCreation;
     use TimestampableUpdation;
 
+    #[API\ApiProperty(identifier: false)]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
+
+    /**
+     * A user-supplied code for this Photo. If left blank, the numeric ID will be taken.
+     */
+    #[API\ApiProperty(identifier: true)]
+    #[ORM\Column(length: 6, unique: true, nullable: true)]
+    private ?string $code = null;
 
     /**
      * Photos are dated approximately between a range of dates.
@@ -87,6 +95,18 @@ class Photo
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getCode(): ?string
+    {
+        return $this->code;
+    }
+
+    public function setCode(string $code): static
+    {
+        $this->code = $code;
+
+        return $this;
     }
 
     public function getDate(): ?PhotoDateRange
