@@ -58,6 +58,14 @@ class PhotosInferCommand extends Command
         );
 
         $this->addOption(
+            'code-filename',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'Extract photo code from image filenames using a given pattern',
+            '[A-Z]{3}[0-9]{3}'
+        );
+
+        $this->addOption(
             'match',
             'M',
             InputOption::VALUE_OPTIONAL,
@@ -137,6 +145,15 @@ class PhotosInferCommand extends Command
 
                 if ($yearInFilename !== $yearInFiledate) {
                     $photo->setDate($date);
+                }
+            }
+
+            $code = $input->getOption('code-filename');
+            if ($code) {
+                $match = \preg_match("/$code/", $image->getSrcFilename(), $matches);
+
+                if ($match) {
+                    $photo->setCode($matches[0]);
                 }
             }
 
