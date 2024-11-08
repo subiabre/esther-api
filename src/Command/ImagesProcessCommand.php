@@ -107,7 +107,7 @@ class ImagesProcessCommand extends Command
             $images = $this->imageRepository->findDangling();
         }
 
-        foreach ($images as $image) {
+        foreach ($images as $key => $image) {
             $io->writeln(sprintf(
                 "Processing <comment>%s</comment> [id: %d] [src: %s]",
                 $image->getSrcFilename(),
@@ -168,9 +168,15 @@ class ImagesProcessCommand extends Command
             $io->progressFinish();
 
             $this->entityManager->persist($image);
+
+            if ($key % 10 === 0) {
+                $this->entityManager->flush();
+                $this->entityManager->clear();
+            }
         }
 
         $this->entityManager->flush();
+        $this->entityManager->clear();
 
         $io->success(sprintf("Analyzed %d Images", count($images)));
 
