@@ -61,7 +61,7 @@ class PhotosUpdateCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         try {
-            $photos = $this->parseId($input->getArgument('id'));
+            $photos = $this->getPhotos($input->getArgument('id'));
 
             foreach ($photos as $photo) {
                 $dateRange = $input->getOption('date-range');
@@ -103,27 +103,25 @@ class PhotosUpdateCommand extends Command
     /**
      * @return Photo[]
      */
-    private function parseId(string $id): array
+    private function getPhotos(string $idExpression): array
     {
-        $photos = $this->photoRepository->findBy(['id' => $id]);
+        if (\preg_match('/^\d+\.\.\d+$/', $idExpression)) {
+            $idRange = \explode('..', $idExpression);
 
-        if (\preg_match('/^\d+\.\.\d+$/', $id)) {
-            $ids = \explode('..', $id);
-
-            if ($ids[1] < $ids[0]) {
+            if ($idRange[1] < $idRange[0]) {
                 throw new \Exception("Invalid ID range. End ID can't be lower than the start ID.");
             }
 
-            $photos = $this->photoRepository->findByRange($ids[0], $ids[1]);
+            return $this->photoRepository->findByRange($idRange[0], $idRange[1]);
         }
 
-        if (\preg_match('/^[0-9]+(?:,[0-9]+)*$/', $id)) {
-            $ids = \explode(',', $id);
+        if (\preg_match('/^\d+,\d+/', $idExpression)) {
+            $ids = \explode(',', $idExpression);
 
-            $photos = $this->photoRepository->findBy(['id' => $ids]);
+            return $this->photoRepository->findBy(['id' => $ids]);
         }
 
-        return $photos;
+        return $this->photoRepository->findBy(['id' => $idExpression]);
     }
 
     private function getPhotoDateRange(string $range): PhotoDateRange
