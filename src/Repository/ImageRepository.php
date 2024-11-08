@@ -44,6 +44,22 @@ class ImageRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * @return Image[] Returns an array of Image objects
+     */
+    public function findByRange(int $start, int $end): array
+    {
+        return $this->createQueryBuilder('i')
+            ->andWhere('i.id >= :start')
+            ->andWhere('i.id <= :end')
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->orderBy('i.id', 'ASC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
     //    /**
     //     * @return Image[] Returns an array of Image objects
     //     */

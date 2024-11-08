@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Entity\Image;
 use App\Repository\ImageRepository;
 use App\Service\ImageManipulationService;
 use App\Service\ImageMetadataService;
@@ -40,6 +41,17 @@ class ImagesProcessCommand extends Command
     protected function configure(): void
     {
         $this->addArgument(
+            'id',
+            InputArgument::REQUIRED,
+            join("\n", [
+                "The ID of the Image to be processed. Accepts expressions.",
+                "e.g: '1' = Image 1",
+                "e.g: '1,10' = Images 1 and 10.",
+                "e.g: '1..10' = Images 1 to 10.",
+            ])
+        );
+
+        $this->addArgument(
             'storage',
             InputArgument::OPTIONAL,
             'The storage to which to store generated image files.',
@@ -50,7 +62,7 @@ class ImagesProcessCommand extends Command
             'dangling',
             null,
             InputOption::VALUE_NONE,
-            'Apply to Images without a Photo'
+            'Apply to Images without a Photo from the given IDs'
         );
 
         $this->addOption(
@@ -101,13 +113,13 @@ class ImagesProcessCommand extends Command
 
         $this->imageManipulationService->setStorage($storage);
 
-        $images = $this->imageRepository->findAll();
-
-        if ($input->getOption('dangling')) {
-            $images = $this->imageRepository->findDangling();
-        }
+        $images = $this->getImages($input->getArgument('id'));
 
         foreach ($images as $key => $image) {
+            if ($input->getOption('dangling') && $image->getPhoto() !== null) {
+                continue;
+            }
+
             $io->writeln(sprintf(
                 "Processing <comment>%s</comment> [id: %d] [src: %s]",
                 $image->getSrcFilename(),
@@ -181,5 +193,29 @@ class ImagesProcessCommand extends Command
         $io->success(sprintf("Analyzed %d Images", count($images)));
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * @return Image[]
+     */
+    private function getImages(string $idExpression): array
+    {
+        if (\preg_match('/^\d+\.\.\d+$/', $idExpression)) {
+            $idRange = \explode('..', $idExpression);
+
+            if ($idRange[1] < $idRange[0]) {
+                throw new \Exception("Invalid ID range. End ID can't be lower than the start ID.");
+            }
+
+            return $this->imageRepository->findByRange($idRange[0], $idRange[1]);
+        }
+
+        if (\preg_match('/^\d+,\d+/', $idExpression)) {
+            $ids = \explode(',', $idExpression);
+
+            return $this->imageRepository->findBy(['id' => $ids]);
+        }
+
+        return $this->imageRepository->findBy(['id' => $idExpression]);
     }
 }
