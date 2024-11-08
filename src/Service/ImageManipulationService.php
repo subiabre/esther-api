@@ -10,7 +10,7 @@ use League\Flysystem\Filesystem;
 
 class ImageManipulationService
 {
-    public const IMAGE_RESIZED_QUALITY = 96;
+    public const IMAGE_RESIZED_QUALITY = 90;
     public const IMAGE_RESIZED_FILENAME = 'resized';
 
     public const IMAGE_CROPPED_QUALITY = 98;
@@ -39,7 +39,7 @@ class ImageManipulationService
         return $this;
     }
 
-    public function generateImageThumb(string $path, int $width = 420): ImageThumb
+    public function generateImageThumb(string $path, int $width = 600): ImageThumb
     {
         $data = \fopen($path, 'r');
         $data = $this->manager->read($data)->scaleDown($width);
