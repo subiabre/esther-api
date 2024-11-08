@@ -131,6 +131,6 @@ class RekognitionService implements VisionInterface, ConfigurableInterface
         $quality = (self::IMAGE_MAX_SIZE * 100) / $filesize;
 
         $file = $this->imageManager->read(\fopen($path, 'r'));
-        return (string) $file->toJpeg(min(95, (int) $quality));
+        return (string) $file->toJpeg(min(90, (int) $quality));
     }
 }
