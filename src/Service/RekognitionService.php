@@ -15,10 +15,12 @@ class RekognitionService implements VisionInterface, ConfigurableInterface
     public const FACE_CONFIDENCE_MIN = 70;
 
     /**
-     * Rekognition's limit is 5MB, we target 4,9 just for safety
+     * Max allowed filesize for Rekognition.
+     * 
+     * Rekognition's limit is 5MB, we target 4.5 just for safety:
      * @link https://docs.aws.amazon.com/rekognition/latest/APIReference/API_Image.html#API_Image_Contents
      */
-    public const IMAGE_MAX_SIZE = 4980736;
+    public const IMAGE_MAX_SIZE = 4718592;
 
     private array $config;
 
