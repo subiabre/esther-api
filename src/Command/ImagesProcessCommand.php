@@ -183,7 +183,6 @@ class ImagesProcessCommand extends Command
 
             if ($key % 10 === 0) {
                 $this->entityManager->flush();
-                $this->entityManager->clear();
             }
         }
 
