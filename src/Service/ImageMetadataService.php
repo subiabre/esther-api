@@ -8,10 +8,13 @@ class ImageMetadataService
 {
     public function getImageMetadata(string $path): ImageMetadata
     {
-        $imginfo = \getimagesize($path);
+        $filename = \pathinfo($path)['filename'];
+        $safepath = \str_replace($filename, \urlencode($filename), $path);
 
-        $filesize = $this->getFileSize($path);
-        $filedate = $this->getFileDate($path);
+        $imginfo = \getimagesize($safepath);
+
+        $filesize = $this->getFileSize($safepath);
+        $filedate = $this->getFileDate($safepath);
 
         return new ImageMetadata(
             $imginfo[0],
