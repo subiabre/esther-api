@@ -69,12 +69,13 @@ class ImagesImportCommand extends Command
         $importedTotal = 0;
         foreach ($listing as $key => $item) {
             $src = $storage->publicUrl($item->path());
+            $src = Image::encodeSrc($src);
 
             if (!ImageFileValidator::isImage($src)) {
                 continue;
             }
 
-            $image = $this->imageRepository->findOneBySrc(Image::encodeSrc($src));
+            $image = $this->imageRepository->findOneBySrc($src);
             $imageExists = $image ? true : false;
 
             if ($imageExists && !$input->getOption('update')) {
