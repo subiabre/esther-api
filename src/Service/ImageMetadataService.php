@@ -54,13 +54,13 @@ class ImageMetadataService
 
     public function getFileDate(string $path): ?\DateTimeImmutable
     {
-        $date = sprintf("@%d", \filemtime($path));
+        $date = \filemtime($path);
 
         if (!$date) {
             $date = $this->getKey($this->getHeaders($path), 'last-modified');
         }
 
-        return \DateTimeImmutable::createFromInterface(new \DateTime($date));
+        return \DateTimeImmutable::createFromInterface(new \DateTime(sprintf("@%d", $date)));
     }
 
     public function getExif(string $path): array
