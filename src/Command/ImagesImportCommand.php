@@ -67,7 +67,7 @@ class ImagesImportCommand extends Command
         $listing = $storage->listContents($location);
 
         $importedTotal = 0;
-        foreach ($listing as $item) {
+        foreach ($listing as $key => $item) {
             $src = $storage->publicUrl($item->path());
             $path = $this->routesService->getLocalUrlAsPath($src);
 
@@ -97,9 +97,14 @@ class ImagesImportCommand extends Command
                 $image->getSrcFilename(),
                 $image->getSrc()
             ));
+
+            if ($key % 10 === 0) {
+                $this->entityManager->flush();
+            }
         }
 
         $this->entityManager->flush();
+        $this->entityManager->clear();
 
         $io->success(sprintf(
             "Imported %d images from %s",
