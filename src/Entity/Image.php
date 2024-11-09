@@ -94,7 +94,7 @@ class Image
     {
         $filename = \pathinfo($src)['filename'];
 
-        return \str_replace($filename, \urlencode($filename), $src);
+        return \str_replace($filename, \urlencode(\urldecode($filename)), $src);
     }
 
     public static function decodeSrc(string $src): string
