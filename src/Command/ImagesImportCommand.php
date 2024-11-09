@@ -75,7 +75,10 @@ class ImagesImportCommand extends Command
                 continue;
             }
 
-            $image = $this->imageRepository->findOneBySrc($src);
+            $image = new Image();
+            $image->setSrc($src);
+
+            $image = $this->imageRepository->findOneBySrc($image->getSrc());
             $imageExists = $image ? true : false;
 
             if ($imageExists && !$input->getOption('update')) {
