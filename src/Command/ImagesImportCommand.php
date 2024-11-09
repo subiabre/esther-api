@@ -69,9 +69,8 @@ class ImagesImportCommand extends Command
         $importedTotal = 0;
         foreach ($listing as $key => $item) {
             $src = $storage->publicUrl($item->path());
-            $path = $this->routesService->getLocalUrlAsPath($src);
 
-            if (!ImageFileValidator::isImage($path)) {
+            if (!ImageFileValidator::isImage($src)) {
                 continue;
             }
 
@@ -89,6 +88,8 @@ class ImagesImportCommand extends Command
                 $image = new Image;
                 $image->setSrc($src);
             }
+
+            $path = $this->routesService->getLocalUrlAsPath($src);
 
             $image->setMetadata($this->imageMetadataService->getImageMetadata($path));
 
