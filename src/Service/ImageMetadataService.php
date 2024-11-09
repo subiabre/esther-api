@@ -39,11 +39,7 @@ class ImageMetadataService
 
     public function getFileSize(string $path): ?int
     {
-        try {
-            $size = \filesize($path);
-        } catch (\ErrorException $e) {
-            $size = false;
-        }
+        $size = @\filesize($path);
 
         if ($size) {
             return $size;
@@ -54,7 +50,7 @@ class ImageMetadataService
 
     public function getFileDate(string $path): ?\DateTimeImmutable
     {
-        $filemtime = \filemtime($path);
+        $filemtime = @\filemtime($path);
 
         if ($filemtime) {
             return new \DateTimeImmutable(sprintf("@%d", $filemtime));
