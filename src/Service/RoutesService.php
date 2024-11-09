@@ -56,6 +56,6 @@ class RoutesService
             );
         }
 
-        return $url;
+        return \urldecode($url);
     }
 }
