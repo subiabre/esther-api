@@ -42,13 +42,14 @@ class ImageMetadataService
         try {
             $size = \filesize($path);
         } catch (\ErrorException $e) {
-            $size = $this->getKey($this->getHeaders($path), 'content-length');
-            if (!$size) {
-                return null;
-            }
+            $size = false;
         }
 
-        return $size;
+        if ($size) {
+            return $size;
+        }
+
+        return $this->getKey($this->getHeaders($path), 'content-length');
     }
 
     public function getFileDate(string $path): ?\DateTimeImmutable
