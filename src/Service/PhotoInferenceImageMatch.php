@@ -18,7 +18,7 @@ class PhotoInferenceImageMatch
     {
         return sprintf(
             "<comment>%s</comment> [distance: %s] [src: %s]",
-            $this->match['item']['image']->getSrcFilename(),
+            $this->match['item']['image']->getFilename(),
             $this->match['score'],
             $this->match['item']['image']->getSrc(),
         );

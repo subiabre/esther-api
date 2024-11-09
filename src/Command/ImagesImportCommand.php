@@ -74,10 +74,7 @@ class ImagesImportCommand extends Command
                 continue;
             }
 
-            $image = new Image();
-            $image->setSrc($src);
-
-            $image = $this->imageRepository->findOneBySrc($image->getSrc());
+            $image = $this->imageRepository->findOneBySrc(Image::encodeSrc($src));
             $imageExists = $image ? true : false;
 
             if ($imageExists && !$input->getOption('update')) {
@@ -98,7 +95,7 @@ class ImagesImportCommand extends Command
 
             $io->writeln(sprintf(
                 "Importing <comment>%s</comment> [src: %s]",
-                $image->getSrcFilename(),
+                $image->getFilename(),
                 $image->getSrc()
             ));
 

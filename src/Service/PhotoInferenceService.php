@@ -30,7 +30,7 @@ class PhotoInferenceService
                 continue;
             }
 
-            $filename = $image->getSrcFilename();
+            $filename = $image->getFilename();
             $choices[$filename] = [
                 'filename' => $filename,
                 'image' => $image
@@ -52,7 +52,7 @@ class PhotoInferenceService
 
         return \array_map(function ($match) {
             return new PhotoInferenceImageMatch($match);
-        }, $fuse->search($needle->getSrcFilename()));
+        }, $fuse->search($needle->getFilename()));
     }
 
     public function matchPhotoImagesByRegex(
@@ -61,7 +61,7 @@ class PhotoInferenceService
         string $pattern
     ): array {
         $needle = $photo->getImages()[0];
-        $needlename = \strtoupper($needle->getSrcFilename());
+        $needlename = \strtoupper($needle->getFilename());
 
         \preg_match("/$pattern/", $needlename, $patternMatches);
         if (empty($patternMatches)) {
@@ -76,7 +76,7 @@ class PhotoInferenceService
                 continue;
             }
 
-            $filename = \strtoupper($image->getSrcFilename());
+            $filename = \strtoupper($image->getFilename());
             if (!\preg_match("/$key$pattern/", $filename)) {
                 continue;
             }

@@ -122,13 +122,13 @@ class ImagesProcessCommand extends Command
 
             $io->writeln(sprintf(
                 "Processing <comment>%s</comment> [id: %d] [src: %s]",
-                $image->getSrcFilename(),
+                $image->getFilename(),
                 $image->getId(),
                 $image->getSrc()
             ));
 
             if ($input->getOption('alt-filename')) {
-                $image->setAlt($image->getSrcFilename());
+                $image->setAlt($image->getFilename());
             }
 
             $path = $this->routesService->getLocalUrlAsPath($image->getSrc());

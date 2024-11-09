@@ -90,6 +90,20 @@ class Image
         return $this->id;
     }
 
+    public static function encodeSrc(string $src): string
+    {
+        $filename = \pathinfo($src)['filename'];
+
+        return \str_replace($filename, \urlencode($filename), $src);
+    }
+
+    public static function decodeSrc(string $src): string
+    {
+        $filename = \pathinfo($src)['filename'];
+
+        return \str_replace($filename, \urldecode($filename), $src);
+    }
+
     public function getSrc(): ?string
     {
         return $this->src;
@@ -97,15 +111,16 @@ class Image
 
     public function setSrc(string $src): static
     {
-        $filename = \pathinfo($src)['filename'];
-        $this->src = \str_replace($filename, \rawurlencode($filename), $src);
+        $this->src = self::encodeSrc($src);
 
         return $this;
     }
 
-    public function getSrcFilename(): ?string
+    public function getFilename(): ?string
     {
-        return \urldecode(\pathinfo($this->src)['filename']);
+        $src = self::decodeSrc($this->src);
+
+        return \pathinfo($src)['filename'];
     }
 
     public function getAlt(): ?string

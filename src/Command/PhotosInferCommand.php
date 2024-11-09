@@ -115,7 +115,7 @@ class PhotosInferCommand extends Command
 
             $io->writeln(sprintf(
                 "Inferring data from <comment>%s</comment> [src: %s]",
-                $image->getSrcFilename(),
+                $image->getFilename(),
                 $image->getSrc()
             ));
 
@@ -139,7 +139,7 @@ class PhotosInferCommand extends Command
             ));
 
             if ($input->getOption('date-filename')) {
-                $date = $this->photoInferenceService->getDateRangeInFilename($image->getSrcFilename());
+                $date = $this->photoInferenceService->getDateRangeInFilename($image->getFilename());
                 $yearInFilename = $date->getMin()->format('Y');
                 $yearInFiledate = $image->getMetadata()->filedate->format('Y');
 
@@ -150,7 +150,7 @@ class PhotosInferCommand extends Command
 
             $code = $input->getOption('code-filename');
             if ($code) {
-                $match = \preg_match("/$code/", $image->getSrcFilename(), $matches);
+                $match = \preg_match("/$code/", $image->getFilename(), $matches);
 
                 if ($match) {
                     $photo->setCode($matches[0]);
@@ -184,7 +184,7 @@ class PhotosInferCommand extends Command
                 $imageMatchesQuestion = new ChoiceQuestion(
                     sprintf(
                         " [i] <comment>%s</comment> is related to",
-                        $image->getSrcFilename()
+                        $image->getFilename()
                     ),
                     ["None", ...$imageMatches]
                 );
