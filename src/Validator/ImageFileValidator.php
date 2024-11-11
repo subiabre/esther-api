@@ -2,6 +2,7 @@
 
 namespace App\Validator;
 
+use App\Entity\Image;
 use App\Service\RoutesService;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
@@ -29,6 +30,7 @@ class ImageFileValidator extends ConstraintValidator
         }
 
         $path = $this->routesService->getLocalUrlAsPath($value);
+        $path = Image::encodeSrc($path);
 
         if (self::isImage($path)) {
             return;
