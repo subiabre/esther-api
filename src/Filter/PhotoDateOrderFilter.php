@@ -44,7 +44,6 @@ final class PhotoDateOrderFilter extends AbstractFilter
                 break;
         }
 
-        $queryBuilder->addOrderBy(sprintf('%s.code', $alias), $direction);
         $queryBuilder->addOrderBy(sprintf('%s.id', $alias), $direction);
     }
 
