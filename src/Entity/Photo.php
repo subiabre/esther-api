@@ -87,6 +87,13 @@ class Photo
     #[Gedmo\Versioned()]
     private array $roles = [];
 
+    /**
+     * A group tag for Photos that belong together.
+     */
+    #[Gedmo\Versioned()]
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $reel = null;
+
     public function __construct()
     {
         $this->images = new ArrayCollection();
@@ -180,6 +187,18 @@ class Photo
     public function setRoles(array $roles): static
     {
         $this->roles = $roles;
+
+        return $this;
+    }
+
+    public function getReel(): ?string
+    {
+        return $this->reel;
+    }
+
+    public function setReel(?string $reel): static
+    {
+        $this->reel = $reel;
 
         return $this;
     }
